@@ -1,0 +1,402 @@
+<!doctype html>
+<!-- =====================================================================
+     Fiesta fin de año 2026 - Página de registro de colaboradores
+     Ruta en el repositorio: index.html
+     Muestra el número del sorteo y el código QR para el ingreso al evento
+     ===================================================================== -->
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Registro - Fiesta fin de año 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --fondo: #0f1d33;
+      --fondo-2: #16294a;
+      --tarjeta: #ffffff;
+      --texto: #1b2433;
+      --texto-suave: #5b6576;
+      --borde: #d9dee7;
+      --dorado: #d9a441;
+      --dorado-oscuro: #a8761c;
+      --rojo: #b3261e;
+      --rojo-fondo: #fdecea;
+      --verde: #1e7a46;
+      --radio: 16px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      color: var(--texto);
+      background:
+        radial-gradient(circle at 15% 10%, rgba(217,164,65,.18) 0, transparent 35%),
+        radial-gradient(circle at 85% 90%, rgba(217,164,65,.12) 0, transparent 40%),
+        linear-gradient(160deg, var(--fondo) 0%, var(--fondo-2) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px;
+    }
+
+    .contenedor { width: 100%; max-width: 440px; }
+
+    .encabezado { text-align: center; color: #fff; margin-bottom: 24px; }
+    .encabezado .etiqueta {
+      display: inline-block;
+      font-size: 12px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--dorado);
+      border: 1px solid rgba(217,164,65,.5);
+      border-radius: 999px;
+      padding: 4px 12px;
+      margin-bottom: 14px;
+    }
+    .encabezado h1 {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 800;
+      font-size: clamp(30px, 8vw, 40px);
+      line-height: 1.1;
+      margin: 0 0 8px;
+    }
+    .encabezado p { margin: 0; color: #c9d2e3; font-size: 15px; }
+
+    .tarjeta {
+      background: var(--tarjeta);
+      border-radius: var(--radio);
+      padding: 28px 24px;
+      box-shadow: 0 20px 50px rgba(0,0,0,.35);
+    }
+
+    h2 { font-size: 18px; margin: 0 0 4px; }
+    .ayuda { color: var(--texto-suave); font-size: 14px; margin: 0 0 20px; }
+
+    label.campo { display: block; font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+    input[type="text"] {
+      width: 100%;
+      font: inherit;
+      font-size: 17px;
+      padding: 12px 14px;
+      border: 1.5px solid var(--borde);
+      border-radius: 10px;
+      margin-bottom: 18px;
+      outline: none;
+      transition: border-color .15s;
+    }
+    input[type="text"]:focus { border-color: var(--dorado); }
+
+    .autorizacion {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      font-size: 13px;
+      color: var(--texto-suave);
+      line-height: 1.45;
+      margin-bottom: 8px;
+    }
+    .autorizacion input { width: 20px; height: 20px; margin-top: 1px; flex-shrink: 0; accent-color: var(--dorado-oscuro); }
+
+    details { font-size: 12.5px; color: var(--texto-suave); margin: 0 0 20px 30px; }
+    details summary { cursor: pointer; color: var(--dorado-oscuro); font-weight: 600; }
+    details p { line-height: 1.5; margin: 8px 0 0; }
+
+    button {
+      width: 100%;
+      font: inherit;
+      font-weight: 600;
+      font-size: 16px;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: var(--dorado);
+      color: #1b1406;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    button:hover { background: #e4b456; }
+    button:disabled { opacity: .6; cursor: wait; }
+    button.secundario {
+      background: transparent;
+      color: var(--texto-suave);
+      border: 1.5px solid var(--borde);
+      margin-top: 10px;
+    }
+    button.secundario:hover { background: #f4f6f9; }
+
+    .mensaje {
+      display: none;
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      background: var(--rojo-fondo);
+      color: var(--rojo);
+    }
+    .mensaje.visible { display: block; }
+
+    /* Resultado: boleta con el número y el QR */
+    .boleta { text-align: center; display: none; }
+    .boleta.visible { display: block; }
+    .boleta .saludo { font-size: 18px; font-weight: 600; margin: 0 0 4px; }
+    .boleta .estado { color: var(--verde); font-size: 14px; margin: 0 0 20px; }
+    .numero-caja {
+      border: 2px dashed var(--dorado);
+      border-radius: var(--radio);
+      padding: 18px 12px 20px;
+      margin-bottom: 20px;
+      background: #fffaf0;
+    }
+    .numero-caja span {
+      display: block;
+      font-size: 12px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--dorado-oscuro);
+    }
+    .numero-caja strong {
+      display: block;
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 800;
+      font-size: 64px;
+      line-height: 1.05;
+      color: var(--texto);
+      margin-bottom: 14px;
+    }
+    #qr {
+      display: inline-block;
+      background: #fff;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid var(--borde);
+    }
+    #qr img, #qr canvas { display: block; width: 200px; height: 200px; }
+    .numero-caja .qr-texto { margin-top: 10px; font-size: 13px; letter-spacing: 0; text-transform: none; color: var(--texto-suave); }
+    .boleta .indicaciones { font-size: 14px; color: var(--texto-suave); line-height: 1.5; margin: 0 0 20px; }
+    .boleta .fecha { font-weight: 600; color: var(--texto); }
+
+    .pie { text-align: center; color: #8e9ab0; font-size: 12px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <main class="contenedor">
+    <header class="encabezado">
+      <div class="etiqueta">Registro de colaboradores</div>
+      <h1 id="titulo-evento">Fiesta fin de año 2026</h1>
+      <p id="fecha-evento">Viernes 18 de diciembre de 2026</p>
+    </header>
+
+    <section class="tarjeta">
+      <!-- Formulario -->
+      <form id="formulario" novalidate>
+        <h2>Regístrese para el sorteo</h2>
+        <p class="ayuda">Recibirá un número único para el sorteo de premios y un código QR para su ingreso al evento.</p>
+
+        <label class="campo" for="identificacion">Número de identificación</label>
+        <input type="text" id="identificacion" inputmode="numeric" autocomplete="off" placeholder="Sin puntos ni espacios" required>
+
+        <label class="campo" for="apellido">Primer apellido</label>
+        <input type="text" id="apellido" autocomplete="family-name" placeholder="Como aparece en su documento" required>
+
+        <label class="autorizacion">
+          <input type="checkbox" id="autoriza">
+          <span>Autorizo el tratamiento de mis datos personales para el registro y el sorteo de la Fiesta fin de año.</span>
+        </label>
+        <details>
+          <summary>Ver autorización completa</summary>
+          <p>
+            De acuerdo con la Ley 1581 de 2012 y el Decreto 1377 de 2013, autorizo a Centro de Cuidados
+            Cardioneurovasculares Pabón S.A.S. y a Clínica Cardioneurovascular Pabón S.A.S. para tratar mis datos
+            de identificación con la única finalidad de registrar mi participación en el evento "Fiesta fin de año 2026",
+            asignar mi número para el sorteo de premios, registrar mi ingreso al evento y publicar mi nombre en caso de
+            resultar ganador. Puedo conocer, actualizar, rectificar y solicitar la supresión de mis datos a través del
+            área de Talento Humano.
+          </p>
+        </details>
+
+        <button type="submit" id="boton">Registrarme</button>
+        <div class="mensaje" id="mensaje" role="alert"></div>
+      </form>
+
+      <!-- Resultado -->
+      <div class="boleta" id="boleta" aria-live="polite">
+        <p class="saludo" id="saludo"></p>
+        <p class="estado" id="estado"></p>
+        <div class="numero-caja">
+          <span>Su número para el sorteo</span>
+          <strong id="numero"></strong>
+          <div id="qr"></div>
+          <span class="qr-texto">Presente este código QR al ingresar al evento</span>
+        </div>
+        <p class="indicaciones">
+          Descargue su boleta o tome una captura de pantalla.<br>
+          Para participar en el sorteo debe asistir al evento el
+          <span class="fecha" id="fecha-boleta">viernes 18 de diciembre de 2026</span>
+          y registrar su ingreso con este código.
+        </p>
+        <button type="button" id="descargar">Descargar boleta</button>
+        <button type="button" class="secundario" id="otro">Registrar a otra persona</button>
+      </div>
+    </section>
+
+    <p class="pie">Sistemas de Información · Clínica Cardioneurovascular Pabón</p>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="js/config.js"></script>
+  <script>
+    const cfg = window.APP_CONFIG;
+    const db = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_KEY);
+
+    const $ = (id) => document.getElementById(id);
+    const formulario = $('formulario');
+    const boleta = $('boleta');
+    const mensaje = $('mensaje');
+    const boton = $('boton');
+
+    let ultimo = null; // { numero, nombre, codigo }
+
+    $('titulo-evento').textContent = cfg.EVENTO_NOMBRE;
+    $('fecha-evento').textContent = cfg.EVENTO_FECHA;
+    $('fecha-boleta').textContent = cfg.EVENTO_FECHA.toLowerCase();
+
+    function mostrarError(texto) {
+      mensaje.textContent = texto;
+      mensaje.classList.add('visible');
+    }
+
+    function dibujarQR(codigo) {
+      const caja = $('qr');
+      caja.innerHTML = '';
+      new QRCode(caja, {
+        text: codigo,
+        width: 400,
+        height: 400,
+        colorDark: '#1b2433',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }
+
+    formulario.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      mensaje.classList.remove('visible');
+
+      const identificacion = $('identificacion').value.trim();
+      const apellido = $('apellido').value.trim();
+      const autoriza = $('autoriza').checked;
+
+      if (!identificacion || !apellido) {
+        mostrarError('Ingrese su número de identificación y su primer apellido.');
+        return;
+      }
+      if (!autoriza) {
+        mostrarError('Debe aceptar la autorización de tratamiento de datos personales.');
+        return;
+      }
+
+      boton.disabled = true;
+      boton.textContent = 'Registrando...';
+
+      try {
+        const { data, error } = await db.rpc('registrar', {
+          p_identificacion: identificacion,
+          p_apellido: apellido,
+          p_autoriza: autoriza
+        });
+
+        if (error) throw error;
+
+        if (!data || !data.ok) {
+          mostrarError(data && data.mensaje ? data.mensaje : 'No fue posible completar el registro.');
+          return;
+        }
+
+        ultimo = { numero: data.numero, nombre: data.nombre, codigo: data.codigo };
+
+        $('saludo').textContent = '¡Listo, ' + data.nombre + '!';
+        $('estado').textContent = data.ya_registrado
+          ? 'Usted ya estaba registrado. Este es su número.'
+          : 'Su registro quedó confirmado.';
+        $('numero').textContent = data.numero;
+        dibujarQR(data.codigo);
+
+        formulario.style.display = 'none';
+        boleta.classList.add('visible');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (err) {
+        console.error(err);
+        mostrarError('No hay conexión con el servidor. Intente de nuevo en unos minutos.');
+      } finally {
+        boton.disabled = false;
+        boton.textContent = 'Registrarme';
+      }
+    });
+
+    // Genera una imagen PNG con el número, el nombre y el QR
+    $('descargar').addEventListener('click', () => {
+      if (!ultimo) return;
+      const qrCanvas = $('qr').querySelector('canvas');
+      if (!qrCanvas) return;
+
+      const ancho = 600, alto = 860;
+      const c = document.createElement('canvas');
+      c.width = ancho; c.height = alto;
+      const ctx = c.getContext('2d');
+
+      ctx.fillStyle = '#0f1d33';
+      ctx.fillRect(0, 0, ancho, alto);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(30, 30, ancho - 60, alto - 60);
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#a8761c';
+      ctx.font = '600 22px Inter, Arial, sans-serif';
+      ctx.fillText(cfg.EVENTO_NOMBRE.toUpperCase(), ancho / 2, 90);
+      ctx.fillStyle = '#5b6576';
+      ctx.font = '400 20px Inter, Arial, sans-serif';
+      ctx.fillText(cfg.EVENTO_FECHA, ancho / 2, 122);
+
+      ctx.fillStyle = '#1b2433';
+      ctx.font = '600 26px Inter, Arial, sans-serif';
+      ctx.fillText(ultimo.nombre, ancho / 2, 180);
+
+      ctx.fillStyle = '#5b6576';
+      ctx.font = '600 16px Inter, Arial, sans-serif';
+      ctx.fillText('NÚMERO PARA EL SORTEO', ancho / 2, 230);
+      ctx.fillStyle = '#1b2433';
+      ctx.font = '800 96px Fraunces, Georgia, serif';
+      ctx.fillText(String(ultimo.numero), ancho / 2, 325);
+
+      ctx.drawImage(qrCanvas, (ancho - 380) / 2, 370, 380, 380);
+
+      ctx.fillStyle = '#5b6576';
+      ctx.font = '400 18px Inter, Arial, sans-serif';
+      ctx.fillText('Presente este código QR al ingresar al evento', ancho / 2, 790);
+
+      const enlace = document.createElement('a');
+      enlace.download = 'boleta-fiesta-' + ultimo.numero + '.png';
+      enlace.href = c.toDataURL('image/png');
+      document.body.appendChild(enlace);
+      enlace.click();
+      enlace.remove();
+    });
+
+    $('otro').addEventListener('click', () => {
+      ultimo = null;
+      formulario.reset();
+      $('qr').innerHTML = '';
+      boleta.classList.remove('visible');
+      formulario.style.display = 'block';
+      $('identificacion').focus();
+    });
+  </script>
+</body>
+</html>

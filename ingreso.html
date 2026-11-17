@@ -1,0 +1,432 @@
+<!doctype html>
+<!-- =====================================================================
+     Fiesta fin de año 2026 - Registro de ingreso al evento (lector de QR)
+     Ruta en el repositorio: ingreso.html
+     Uso: personal con rol "admin" o "ingreso", desde el celular
+     La cámara solo funciona con HTTPS (GitHub Pages) o localhost
+     ===================================================================== -->
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ingreso - Fiesta fin de año 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --fondo: #0f1d33;
+      --fondo-2: #16294a;
+      --tarjeta: #ffffff;
+      --texto: #1b2433;
+      --texto-suave: #5b6576;
+      --borde: #d9dee7;
+      --dorado: #d9a441;
+      --verde: #1e7a46;
+      --verde-fondo: #e6f4ec;
+      --ambar: #8a5a00;
+      --ambar-fondo: #fff4dc;
+      --rojo: #b3261e;
+      --rojo-fondo: #fdecea;
+      --radio: 16px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      color: var(--texto);
+      background: linear-gradient(160deg, var(--fondo) 0%, var(--fondo-2) 100%);
+      padding: 20px 16px 32px;
+    }
+
+    .contenedor { width: 100%; max-width: 480px; margin: 0 auto; }
+
+    .barra {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #fff;
+      margin-bottom: 16px;
+      gap: 12px;
+    }
+    .barra h1 { font-size: 18px; margin: 0; }
+    .barra .usuario { font-size: 12px; color: #c9d2e3; text-align: right; }
+    .barra .usuario button {
+      width: auto;
+      margin-top: 4px;
+      padding: 4px 10px;
+      font-size: 12px;
+      background: transparent;
+      color: var(--dorado);
+      border: 1px solid rgba(217,164,65,.5);
+    }
+
+    .tarjeta {
+      background: var(--tarjeta);
+      border-radius: var(--radio);
+      padding: 22px 20px;
+      box-shadow: 0 20px 50px rgba(0,0,0,.35);
+      margin-bottom: 16px;
+    }
+
+    h2 { font-size: 17px; margin: 0 0 14px; }
+
+    label.campo { display: block; font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+    input[type="email"], input[type="password"], input[type="text"] {
+      width: 100%;
+      font: inherit;
+      font-size: 17px;
+      padding: 12px 14px;
+      border: 1.5px solid var(--borde);
+      border-radius: 10px;
+      margin-bottom: 14px;
+      outline: none;
+    }
+    input:focus { border-color: var(--dorado); }
+
+    button {
+      width: 100%;
+      font: inherit;
+      font-weight: 600;
+      font-size: 16px;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: var(--dorado);
+      color: #1b1406;
+      cursor: pointer;
+    }
+    button:disabled { opacity: .6; cursor: wait; }
+    button.secundario { background: transparent; color: var(--texto-suave); border: 1.5px solid var(--borde); }
+    button.verde { background: var(--verde); color: #fff; }
+
+    .fila { display: flex; gap: 10px; }
+    .fila > * { flex: 1; }
+
+    .oculto { display: none !important; }
+
+    .mensaje {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      background: var(--rojo-fondo);
+      color: var(--rojo);
+    }
+
+    #lector {
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000;
+      min-height: 240px;
+    }
+    .nota { font-size: 13px; color: var(--texto-suave); margin: 10px 0 0; text-align: center; }
+
+    /* Resultado del escaneo */
+    .resultado { text-align: center; }
+    .resultado .estado {
+      display: inline-block;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+    }
+    .estado.pendiente { background: #eef1f6; color: var(--texto-suave); }
+    .estado.ok { background: var(--verde-fondo); color: var(--verde); }
+    .estado.repetido { background: var(--ambar-fondo); color: var(--ambar); }
+    .resultado .numero {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 800;
+      font-size: 64px;
+      line-height: 1;
+      margin: 4px 0 8px;
+    }
+    .resultado .nombre { font-size: 20px; font-weight: 600; margin: 0 0 4px; }
+    .resultado .detalle { font-size: 14px; color: var(--texto-suave); margin: 0 0 18px; }
+
+    .contador { text-align: center; color: #c9d2e3; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <main class="contenedor">
+    <div class="barra">
+      <h1>Ingreso al evento</h1>
+      <div class="usuario oculto" id="zona-usuario">
+        <div id="correo-usuario"></div>
+        <button type="button" id="salir">Cerrar sesión</button>
+      </div>
+    </div>
+
+    <!-- 1. Inicio de sesión -->
+    <section class="tarjeta" id="vista-login">
+      <h2>Iniciar sesión</h2>
+      <form id="form-login" novalidate>
+        <label class="campo" for="correo">Correo</label>
+        <input type="email" id="correo" autocomplete="username" required>
+        <label class="campo" for="clave">Contraseña</label>
+        <input type="password" id="clave" autocomplete="current-password" required>
+        <button type="submit" id="boton-login">Entrar</button>
+        <div class="mensaje oculto" id="mensaje-login" role="alert"></div>
+      </form>
+    </section>
+
+    <!-- 2. Lector de QR y búsqueda manual -->
+    <section class="oculto" id="vista-lector">
+      <div class="tarjeta" id="tarjeta-lector">
+        <h2>Escanee el código QR</h2>
+        <div id="lector"></div>
+        <p class="nota" id="nota-camara">Apunte la cámara al código QR de la boleta.</p>
+      </div>
+
+      <div class="tarjeta" id="tarjeta-manual">
+        <h2>Sin código QR</h2>
+        <form id="form-manual" novalidate>
+          <label class="campo" for="valor-manual">Cédula o número del sorteo</label>
+          <input type="text" id="valor-manual" inputmode="numeric" autocomplete="off">
+          <button type="submit" class="secundario">Buscar</button>
+        </form>
+      </div>
+      <div class="mensaje oculto" id="mensaje-lector" role="alert"></div>
+    </section>
+
+    <!-- 3. Resultado -->
+    <section class="tarjeta resultado oculto" id="vista-resultado" aria-live="polite">
+      <span class="estado pendiente" id="res-estado">Confirme la identidad</span>
+      <div class="numero" id="res-numero"></div>
+      <p class="nombre" id="res-nombre"></p>
+      <p class="detalle" id="res-detalle"></p>
+      <div class="fila" id="acciones-confirmar">
+        <button type="button" class="secundario" id="cancelar">Cancelar</button>
+        <button type="button" class="verde" id="confirmar">Confirmar ingreso</button>
+      </div>
+      <button type="button" class="oculto" id="siguiente">Siguiente persona</button>
+    </section>
+
+    <p class="contador oculto" id="contador">Ingresos marcados en este dispositivo: <strong id="total">0</strong></p>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+  <script src="js/config.js"></script>
+  <script>
+    const cfg = window.APP_CONFIG;
+    const db = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_KEY);
+    const $ = (id) => document.getElementById(id);
+
+    const UUID = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+
+    let lector = null;          // instancia de Html5Qrcode
+    let camaraActiva = false;
+    let valorActual = null;     // lo que se escaneó o escribió
+    let ocupado = false;
+    let totalMarcados = 0;
+
+    function mostrar(id, visible) { $(id).classList.toggle('oculto', !visible); }
+
+    function error(id, texto) {
+      $(id).textContent = texto;
+      mostrar(id, !!texto);
+    }
+
+    // ---------------------------------------------------------------
+    // Sesión
+    // ---------------------------------------------------------------
+    async function verificarSesion() {
+      const { data: { session } } = await db.auth.getSession();
+      if (!session) { vistaLogin(); return; }
+
+      const { data: rol, error: err } = await db.rpc('mi_rol');
+      if (err || (rol !== 'admin' && rol !== 'ingreso')) {
+        await db.auth.signOut();
+        vistaLogin();
+        error('mensaje-login', 'Este usuario no tiene permiso para registrar ingresos.');
+        return;
+      }
+
+      $('correo-usuario').textContent = session.user.email;
+      mostrar('zona-usuario', true);
+      mostrar('vista-login', false);
+      mostrar('vista-lector', true);
+      mostrar('contador', true);
+      iniciarCamara();
+    }
+
+    function vistaLogin() {
+      detenerCamara();
+      mostrar('zona-usuario', false);
+      mostrar('vista-lector', false);
+      mostrar('vista-resultado', false);
+      mostrar('contador', false);
+      mostrar('vista-login', true);
+    }
+
+    $('form-login').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      error('mensaje-login', '');
+      const boton = $('boton-login');
+      boton.disabled = true;
+      boton.textContent = 'Entrando...';
+
+      const { error: err } = await db.auth.signInWithPassword({
+        email: $('correo').value.trim(),
+        password: $('clave').value
+      });
+
+      boton.disabled = false;
+      boton.textContent = 'Entrar';
+
+      if (err) {
+        error('mensaje-login', 'Correo o contraseña incorrectos.');
+        return;
+      }
+      $('clave').value = '';
+      verificarSesion();
+    });
+
+    $('salir').addEventListener('click', async () => {
+      await db.auth.signOut();
+      vistaLogin();
+    });
+
+    // ---------------------------------------------------------------
+    // Cámara
+    // ---------------------------------------------------------------
+    async function iniciarCamara() {
+      if (camaraActiva) return;
+      try {
+        if (!lector) lector = new Html5Qrcode('lector');
+        await lector.start(
+          { facingMode: 'environment' },
+          { fps: 10, qrbox: { width: 240, height: 240 } },
+          alLeerQR,
+          () => {}
+        );
+        camaraActiva = true;
+        $('nota-camara').textContent = 'Apunte la cámara al código QR de la boleta.';
+      } catch (err) {
+        console.error(err);
+        camaraActiva = false;
+        $('nota-camara').textContent =
+          'No se pudo abrir la cámara. Verifique el permiso del navegador o use la búsqueda por cédula.';
+      }
+    }
+
+    async function detenerCamara() {
+      if (lector && camaraActiva) {
+        try { await lector.stop(); } catch (e) { /* sin acción */ }
+      }
+      camaraActiva = false;
+    }
+
+    function alLeerQR(texto) {
+      if (ocupado) return;
+      const coincidencia = String(texto).match(UUID);
+      buscar(coincidencia ? coincidencia[0] : String(texto).trim());
+    }
+
+    $('form-manual').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const valor = $('valor-manual').value.trim();
+      if (!valor) return;
+      buscar(valor);
+    });
+
+    // ---------------------------------------------------------------
+    // Consulta y confirmación
+    // ---------------------------------------------------------------
+    async function buscar(valor) {
+      ocupado = true;
+      error('mensaje-lector', '');
+      await detenerCamara();
+
+      const { data, error: err } = await db.rpc('marcar_asistencia', { p_valor: valor, p_confirmar: false });
+
+      if (err) {
+        ocupado = false;
+        error('mensaje-lector', err.message === 'No autorizado'
+          ? 'Su sesión no tiene permiso. Cierre sesión y vuelva a entrar.'
+          : 'Error de conexión. Intente de nuevo.');
+        iniciarCamara();
+        return;
+      }
+
+      if (!data.ok) {
+        ocupado = false;
+        error('mensaje-lector', data.mensaje);
+        iniciarCamara();
+        return;
+      }
+
+      valorActual = valor;
+      pintarResultado(data, false);
+    }
+
+    function pintarResultado(d, recienMarcado) {
+      $('res-numero').textContent = d.numero;
+      $('res-nombre').textContent = (d.nombres + ' ' + d.apellidos).trim();
+      $('res-detalle').textContent = [d.cargo, d.empresa].filter(Boolean).join(' · ');
+
+      const estado = $('res-estado');
+      if (recienMarcado) {
+        estado.className = 'estado ok';
+        estado.textContent = 'Ingreso registrado';
+      } else if (d.ya_habia_llegado) {
+        const hora = d.fecha_asistencia
+          ? new Date(d.fecha_asistencia).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })
+          : '';
+        estado.className = 'estado repetido';
+        estado.textContent = 'Ya había ingresado' + (hora ? ' a las ' + hora : '');
+      } else {
+        estado.className = 'estado pendiente';
+        estado.textContent = 'Confirme la identidad';
+      }
+
+      const pendiente = !recienMarcado && !d.ya_habia_llegado;
+      mostrar('acciones-confirmar', pendiente);
+      mostrar('siguiente', !pendiente);
+
+      mostrar('vista-lector', false);
+      mostrar('vista-resultado', true);
+      window.scrollTo({ top: 0 });
+    }
+
+    $('confirmar').addEventListener('click', async () => {
+      const boton = $('confirmar');
+      boton.disabled = true;
+      const { data, error: err } = await db.rpc('marcar_asistencia', { p_valor: valorActual, p_confirmar: true });
+      boton.disabled = false;
+
+      if (err || !data.ok) {
+        volverAlLector();
+        error('mensaje-lector', 'No se pudo registrar el ingreso. Intente de nuevo.');
+        return;
+      }
+
+      if (!data.ya_habia_llegado) {
+        totalMarcados++;
+        $('total').textContent = totalMarcados;
+      }
+      pintarResultado(data, !data.ya_habia_llegado);
+    });
+
+    function volverAlLector() {
+      valorActual = null;
+      ocupado = false;
+      $('valor-manual').value = '';
+      mostrar('vista-resultado', false);
+      mostrar('vista-lector', true);
+      iniciarCamara();
+    }
+
+    $('cancelar').addEventListener('click', volverAlLector);
+    $('siguiente').addEventListener('click', volverAlLector);
+
+    verificarSesion();
+  </script>
+</body>
+</html>
