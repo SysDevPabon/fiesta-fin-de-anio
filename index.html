@@ -201,9 +201,6 @@
         <label class="campo" for="identificacion">Número de identificación</label>
         <input type="text" id="identificacion" inputmode="numeric" autocomplete="off" placeholder="Sin puntos ni espacios" required>
 
-        <label class="campo" for="apellido">Primer apellido</label>
-        <input type="text" id="apellido" autocomplete="family-name" placeholder="Como aparece en su documento" required>
-
         <label class="autorizacion">
           <input type="checkbox" id="autoriza">
           <span>Autorizo el tratamiento de mis datos personales para el registro y el sorteo de la Fiesta fin de año.</span>
@@ -290,11 +287,10 @@
       mensaje.classList.remove('visible');
 
       const identificacion = $('identificacion').value.trim();
-      const apellido = $('apellido').value.trim();
       const autoriza = $('autoriza').checked;
 
-      if (!identificacion || !apellido) {
-        mostrarError('Ingrese su número de identificación y su primer apellido.');
+      if (!identificacion) {
+        mostrarError('Ingrese su número de identificación.');
         return;
       }
       if (!autoriza) {
@@ -308,7 +304,6 @@
       try {
         const { data, error } = await db.rpc('registrar', {
           p_identificacion: identificacion,
-          p_apellido: apellido,
           p_autoriza: autoriza
         });
 
