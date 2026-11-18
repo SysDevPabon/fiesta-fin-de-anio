@@ -1,0 +1,816 @@
+<!doctype html>
+<!-- =====================================================================
+     Fiesta fin de año 2026 - Pantalla del sorteo (para proyectar)
+     Ruta en el repositorio: sorteo.html
+     Uso: solo usuarios con rol "admin"
+     El ganador lo elige la base de datos (función sortear); la animación
+     solo muestra el resultado. Teclas: Espacio = sortear, Flecha derecha = siguiente premio
+     ===================================================================== -->
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sorteo - Fiesta fin de año 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --fondo: #0b1628;
+      --fondo-2: #16294a;
+      --panel: rgba(255,255,255,.06);
+      --borde: rgba(255,255,255,.12);
+      --texto: #ffffff;
+      --texto-suave: #b9c4d8;
+      --dorado: #d9a441;
+      --dorado-claro: #f1c96b;
+      --verde: #5fd08f;
+      --rojo: #ff8a80;
+      --radio: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { height: 100%; }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      color: var(--texto);
+      background:
+        radial-gradient(circle at 50% 35%, rgba(217,164,65,.22) 0, transparent 45%),
+        radial-gradient(circle at 10% 100%, rgba(217,164,65,.10) 0, transparent 40%),
+        linear-gradient(160deg, var(--fondo) 0%, var(--fondo-2) 100%);
+      background-attachment: fixed;
+      min-height: 100vh;
+    }
+
+    button {
+      font: inherit;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      padding: 10px 16px;
+      font-size: 14px;
+      background: var(--dorado);
+      color: #1b1406;
+    }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    button.borde { background: transparent; color: var(--texto-suave); border: 1px solid var(--borde); }
+    button.borde:hover:not(:disabled) { color: #fff; border-color: rgba(255,255,255,.35); }
+
+    .oculto { display: none !important; }
+
+    /* ---------- Encabezado ---------- */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 18px clamp(16px, 3vw, 40px);
+    }
+    .marca small {
+      display: block;
+      color: var(--dorado);
+      font-size: 12px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+    .marca strong { font-family: 'Fraunces', Georgia, serif; font-weight: 800; font-size: clamp(20px, 2.2vw, 28px); }
+    .controles { display: flex; gap: 8px; flex-wrap: wrap; }
+    .controles button { padding: 8px 12px; font-size: 13px; }
+
+    /* ---------- Distribución ---------- */
+    .escenario-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: clamp(16px, 2vw, 28px);
+      padding: 0 clamp(16px, 3vw, 40px) 32px;
+      min-height: calc(100vh - 90px);
+    }
+    @media (max-width: 900px) {
+      .escenario-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ---------- Escenario principal ---------- */
+    .escenario {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: clamp(20px, 3vw, 40px) 12px;
+    }
+    .posicion {
+      font-size: clamp(13px, 1.2vw, 16px);
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--dorado);
+      margin-bottom: 10px;
+    }
+    .premio-nombre {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 800;
+      font-size: clamp(30px, 4.4vw, 64px);
+      line-height: 1.08;
+      margin: 0 0 8px;
+      max-width: 22ch;
+    }
+    .premio-detalle { color: var(--texto-suave); font-size: clamp(14px, 1.4vw, 20px); margin: 0 0 4px; }
+    .premio-para {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(217,164,65,.45);
+      color: var(--dorado-claro);
+      font-size: clamp(13px, 1.2vw, 16px);
+    }
+
+    .numero-caja {
+      margin: clamp(20px, 3vw, 36px) 0 clamp(14px, 2vw, 22px);
+      min-width: min(520px, 90%);
+      padding: clamp(10px, 1.5vw, 18px) clamp(24px, 4vw, 60px);
+      border-radius: 28px;
+      border: 2px solid rgba(217,164,65,.55);
+      background: rgba(0,0,0,.18);
+      box-shadow: 0 0 80px rgba(217,164,65,.15) inset;
+    }
+    .numero-caja span {
+      display: block;
+      font-size: clamp(12px, 1.1vw, 15px);
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--texto-suave);
+    }
+    #numero {
+      display: block;
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 800;
+      font-size: clamp(110px, 17vw, 260px);
+      line-height: 1;
+      color: var(--dorado-claro);
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 6px 40px rgba(217,164,65,.35);
+    }
+    .girando #numero { color: #fff; }
+    .revelado #numero { animation: latido .6s ease-out; }
+    @keyframes latido {
+      0% { transform: scale(.85); }
+      60% { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+
+    .ganador { min-height: clamp(70px, 9vw, 120px); }
+    .ganador .titulo {
+      color: var(--verde);
+      font-weight: 600;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      font-size: clamp(13px, 1.2vw, 16px);
+      margin-bottom: 6px;
+    }
+    .ganador .nombre {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 700;
+      font-size: clamp(26px, 3.4vw, 50px);
+      line-height: 1.1;
+    }
+    .ganador .cargo { color: var(--texto-suave); font-size: clamp(14px, 1.3vw, 19px); margin-top: 6px; }
+    .ganador .estado-juego { color: var(--texto-suave); font-size: clamp(15px, 1.5vw, 21px); }
+
+    .acciones-escenario { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: clamp(14px, 2vw, 24px); }
+    #sortear {
+      font-size: clamp(18px, 1.8vw, 24px);
+      padding: 16px 48px;
+      border-radius: 999px;
+      box-shadow: 0 10px 40px rgba(217,164,65,.35);
+    }
+    #siguiente { font-size: 16px; padding: 14px 28px; border-radius: 999px; }
+
+    .anular-caja {
+      margin-top: 16px;
+      padding: 16px;
+      border: 1px solid var(--borde);
+      border-radius: 14px;
+      background: rgba(0,0,0,.25);
+      max-width: 520px;
+    }
+    .anular-caja p { margin: 0 0 12px; color: var(--texto-suave); font-size: 14px; }
+    .anular-caja .acciones-escenario { margin-top: 0; }
+
+    .vacio-escenario { color: var(--texto-suave); font-size: 18px; max-width: 32ch; line-height: 1.5; }
+    .vacio-escenario a { color: var(--dorado-claro); }
+
+    /* ---------- Lista de premios ---------- */
+    aside {
+      background: var(--panel);
+      border: 1px solid var(--borde);
+      border-radius: var(--radio);
+      padding: 18px;
+      align-self: start;
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
+    }
+    aside h2 { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--texto-suave); margin: 0 0 12px; font-weight: 600; }
+    aside .progreso { font-size: 13px; color: var(--texto-suave); margin: -6px 0 12px; }
+    #lista-premios { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+    #lista-premios button {
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      color: var(--texto);
+      border: 1px solid var(--borde);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: 500;
+      display: grid;
+      grid-template-columns: 26px 1fr;
+      gap: 2px 8px;
+    }
+    #lista-premios button:hover:not(:disabled) { border-color: rgba(255,255,255,.35); }
+    #lista-premios button.activo { border-color: var(--dorado); background: rgba(217,164,65,.12); }
+    #lista-premios .orden { color: var(--dorado); font-weight: 700; grid-row: span 2; }
+    #lista-premios .nombre-premio { font-weight: 600; font-size: 14px; }
+    #lista-premios .info { font-size: 12.5px; color: var(--texto-suave); }
+    #lista-premios .info.listo { color: var(--verde); }
+
+    /* ---------- Inicio de sesión ---------- */
+    .login {
+      max-width: 400px;
+      margin: 8vh auto 0;
+      background: #fff;
+      color: #1b2433;
+      border-radius: var(--radio);
+      padding: 26px 24px;
+    }
+    .login h2 { margin: 0 0 6px; font-size: 18px; }
+    .login p { margin: 0 0 16px; color: #5b6576; font-size: 14px; }
+    .login label { display: block; font-weight: 600; font-size: 13px; margin-bottom: 6px; }
+    .login input {
+      width: 100%;
+      font: inherit;
+      font-size: 16px;
+      padding: 11px 13px;
+      border: 1.5px solid #dfe3ea;
+      border-radius: 10px;
+      margin-bottom: 14px;
+      outline: none;
+    }
+    .login input:focus { border-color: var(--dorado); }
+    .login button { width: 100%; padding: 13px; font-size: 16px; }
+    .mensaje { margin-top: 12px; padding: 12px 14px; border-radius: 10px; font-size: 14px; background: #fdecea; color: #b3261e; }
+
+    .aviso {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%);
+      max-width: calc(100% - 32px);
+      background: #fff;
+      color: #1b2433;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      z-index: 20;
+    }
+    .aviso.error { background: #b3261e; color: #fff; }
+
+    canvas#confeti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 15; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="marca">
+      <small>Sorteo de premios</small>
+      <strong id="titulo-evento">Fiesta fin de año 2026</strong>
+    </div>
+    <div class="controles oculto" id="controles">
+      <button type="button" class="borde" id="pantalla-completa">Pantalla completa</button>
+      <button type="button" class="borde" id="actualizar">Actualizar</button>
+      <button type="button" class="borde" id="salir">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <!-- Inicio de sesión -->
+  <section class="login" id="vista-login">
+    <h2>Iniciar sesión</h2>
+    <p>Acceso exclusivo para administradores.</p>
+    <form id="form-login" novalidate>
+      <label for="correo">Correo</label>
+      <input type="email" id="correo" autocomplete="username" required>
+      <label for="clave">Contraseña</label>
+      <input type="password" id="clave" autocomplete="current-password" required>
+      <button type="submit" id="boton-login">Entrar</button>
+      <div class="mensaje oculto" id="mensaje-login" role="alert"></div>
+    </form>
+  </section>
+
+  <!-- Sorteo -->
+  <div class="escenario-grid oculto" id="vista-sorteo">
+    <section class="escenario" id="escenario" aria-live="polite">
+      <div id="sin-premios" class="vacio-escenario oculto">
+        Aún no hay premios creados.<br>
+        Créelos en el <a href="admin.html">panel de administración</a>, pestaña Premios.
+      </div>
+
+      <div id="con-premios">
+        <div class="posicion" id="posicion"></div>
+        <h1 class="premio-nombre" id="premio-nombre"></h1>
+        <p class="premio-detalle oculto" id="premio-descripcion"></p>
+        <span class="premio-para" id="premio-para"></span>
+
+        <div class="numero-caja">
+          <span>Número ganador</span>
+          <strong id="numero">?</strong>
+        </div>
+
+        <div class="ganador" id="ganador"></div>
+
+        <div class="acciones-escenario">
+          <button type="button" id="sortear">Sortear</button>
+          <button type="button" id="siguiente" class="oculto">Siguiente premio →</button>
+          <button type="button" class="borde oculto" id="anular">Anular ganador</button>
+        </div>
+
+        <div class="anular-caja oculto" id="anular-caja">
+          <p>¿Por qué se anula este ganador? El premio quedará libre para sortearse de nuevo.</p>
+          <div class="acciones-escenario">
+            <button type="button" id="anular-ausente">No está presente (sale del sorteo)</button>
+            <button type="button" class="borde" id="anular-error">Error (sigue participando)</button>
+            <button type="button" class="borde" id="anular-cancelar">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside>
+      <h2>Premios</h2>
+      <p class="progreso" id="progreso"></p>
+      <ul id="lista-premios"></ul>
+    </aside>
+  </div>
+
+  <canvas id="confeti"></canvas>
+  <div class="aviso oculto" id="aviso" role="status"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script>
+    const cfg = window.APP_CONFIG;
+    const db = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_KEY);
+    const $ = (id) => document.getElementById(id);
+
+    const estado = {
+      participantes: [],
+      premios: [],
+      ganadores: [],
+      rangos: [],
+      actual: null,       // id del premio en pantalla
+      girando: false,
+      sesion: false
+    };
+
+    $('titulo-evento').textContent = cfg.EVENTO_NOMBRE;
+
+    // ---------------------------------------------------------------
+    // Utilidades
+    // ---------------------------------------------------------------
+    function esc(valor) {
+      return String(valor ?? '').replace(/[&<>"']/g, (c) => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+      ));
+    }
+
+    function mostrar(id, visible) { $(id).classList.toggle('oculto', !visible); }
+
+    let temporizadorAviso = null;
+    function aviso(texto, esError) {
+      const caja = $('aviso');
+      caja.textContent = texto;
+      caja.className = 'aviso' + (esError ? ' error' : '');
+      clearTimeout(temporizadorAviso);
+      temporizadorAviso = setTimeout(() => caja.classList.add('oculto'), 4500);
+    }
+
+    function nombreRango(id) {
+      const r = estado.rangos.find((x) => x.id === id);
+      return r ? r.nombre : '';
+    }
+
+    async function traerTodo(tabla, orden) {
+      const filas = [];
+      const paso = 1000;
+      for (let desde = 0; ; desde += paso) {
+        let consulta = db.from(tabla).select('*').range(desde, desde + paso - 1);
+        if (orden) consulta = consulta.order(orden, { ascending: true });
+        const { data, error } = await consulta;
+        if (error) throw error;
+        filas.push(...data);
+        if (data.length < paso) break;
+      }
+      return filas;
+    }
+
+    // ---------------------------------------------------------------
+    // Sesión
+    // ---------------------------------------------------------------
+    function vistaLogin(textoError) {
+      estado.sesion = false;
+      mostrar('controles', false);
+      mostrar('vista-sorteo', false);
+      mostrar('vista-login', true);
+      $('mensaje-login').textContent = textoError || '';
+      mostrar('mensaje-login', !!textoError);
+    }
+
+    async function verificarSesion() {
+      const { data: { session } } = await db.auth.getSession();
+      if (!session) { vistaLogin(); return; }
+
+      const { data: rol, error } = await db.rpc('mi_rol');
+      if (error || rol !== 'admin') {
+        vistaLogin('Solo los administradores pueden realizar el sorteo.');
+        return;
+      }
+
+      estado.sesion = true;
+      mostrar('vista-login', false);
+      mostrar('controles', true);
+      mostrar('vista-sorteo', true);
+      await cargarDatos();
+    }
+
+    $('form-login').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      mostrar('mensaje-login', false);
+      const boton = $('boton-login');
+      boton.disabled = true;
+      boton.textContent = 'Entrando...';
+      const { error } = await db.auth.signInWithPassword({
+        email: $('correo').value.trim(),
+        password: $('clave').value
+      });
+      boton.disabled = false;
+      boton.textContent = 'Entrar';
+      if (error) {
+        const m = (error.message || '').toLowerCase();
+        vistaLogin(m.includes('invalid login credentials')
+          ? 'Correo o contraseña incorrectos.'
+          : 'Error al iniciar sesión: ' + error.message);
+        return;
+      }
+      $('clave').value = '';
+      verificarSesion();
+    });
+
+    $('salir').addEventListener('click', async () => {
+      await db.auth.signOut();
+      vistaLogin();
+    });
+
+    $('pantalla-completa').addEventListener('click', () => {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen().catch(() => {});
+    });
+
+    // ---------------------------------------------------------------
+    // Datos
+    // ---------------------------------------------------------------
+    async function cargarDatos(silencioso) {
+      try {
+        const [participantes, premios, ganadores, rangos] = await Promise.all([
+          traerTodo('v_participantes', 'numero'),
+          traerTodo('premios', 'orden'),
+          traerTodo('ganadores', 'id'),
+          traerTodo('rangos_antiguedad', 'id')
+        ]);
+        estado.participantes = participantes;
+        estado.premios = premios.sort((a, b) => (a.orden - b.orden) || (a.id - b.id));
+        estado.ganadores = ganadores;
+        estado.rangos = rangos;
+
+        if (!estado.premios.some((p) => p.id === estado.actual)) {
+          const pendiente = siguientePendiente();
+          estado.actual = pendiente ? pendiente.id : (estado.premios[0] ? estado.premios[0].id : null);
+        }
+        if (!estado.girando) pintar();
+      } catch (err) {
+        console.error(err);
+        if (!silencioso) aviso('No se pudieron cargar los datos: ' + (err.message || err), true);
+      }
+    }
+
+    $('actualizar').addEventListener('click', () => cargarDatos(false));
+
+    // Actualiza cada 20 segundos (llegan asistentes durante el evento)
+    setInterval(() => {
+      if (estado.sesion && !estado.girando) cargarDatos(true);
+    }, 20000);
+
+    function premioActual() { return estado.premios.find((p) => p.id === estado.actual) || null; }
+
+    function ganadorDe(premioId) {
+      const g = estado.ganadores.find((x) => x.premio_id === premioId);
+      if (!g) return null;
+      return estado.participantes.find((p) => p.numero === g.numero) || { numero: g.numero, nombres: '', apellidos: '' };
+    }
+
+    function candidatos(premio) {
+      return estado.participantes.filter((p) =>
+        p.asistio && !p.ya_gano
+        && (!premio.tipo_personal || p.tipo_personal === premio.tipo_personal)
+        && (!premio.rango_antiguedad || p.rango_id === premio.rango_antiguedad)
+      );
+    }
+
+    function siguientePendiente(despuesDe) {
+      const lista = estado.premios;
+      const desde = despuesDe ? lista.findIndex((p) => p.id === despuesDe) + 1 : 0;
+      return lista.slice(desde).find((p) => !ganadorDe(p.id))
+        || lista.slice(0, desde).find((p) => !ganadorDe(p.id))
+        || null;
+    }
+
+    function textoPara(premio) {
+      const partes = [];
+      if (premio.tipo_personal) partes.push('Personal ' + premio.tipo_personal.toLowerCase());
+      if (premio.rango_antiguedad) partes.push(nombreRango(premio.rango_antiguedad));
+      return partes.length ? 'Para: ' + partes.join(' · ') : 'Para todos los asistentes';
+    }
+
+    // ---------------------------------------------------------------
+    // Pintar pantalla
+    // ---------------------------------------------------------------
+    function pintar() {
+      pintarLista();
+      pintarEscenario();
+    }
+
+    function pintarLista() {
+      const total = estado.premios.length;
+      const listos = estado.premios.filter((p) => ganadorDe(p.id)).length;
+      $('progreso').textContent = total ? `${listos} de ${total} sorteados` : '';
+
+      $('lista-premios').innerHTML = estado.premios.map((pr) => {
+        const g = ganadorDe(pr.id);
+        const info = g
+          ? `<span class="info listo">N.º ${g.numero} · ${esc(g.nombres)} ${esc(g.apellidos)}</span>`
+          : `<span class="info">${candidatos(pr).length} en juego</span>`;
+        return `<li>
+          <button type="button" data-premio="${pr.id}" class="${pr.id === estado.actual ? 'activo' : ''}" ${estado.girando ? 'disabled' : ''}>
+            <span class="orden">${pr.orden}</span>
+            <span class="nombre-premio">${esc(pr.nombre)}</span>
+            ${info}
+          </button>
+        </li>`;
+      }).join('');
+    }
+
+    function pintarEscenario() {
+      const pr = premioActual();
+      mostrar('sin-premios', !pr);
+      mostrar('con-premios', !!pr);
+      mostrar('anular-caja', false);
+      if (!pr) return;
+
+      const indice = estado.premios.findIndex((p) => p.id === pr.id);
+      $('posicion').textContent = `Premio ${indice + 1} de ${estado.premios.length}`;
+      $('premio-nombre').textContent = pr.nombre;
+      $('premio-descripcion').textContent = pr.descripcion || '';
+      mostrar('premio-descripcion', !!pr.descripcion);
+      $('premio-para').textContent = textoPara(pr);
+
+      const escenario = $('escenario');
+      escenario.classList.remove('girando', 'revelado');
+
+      const g = ganadorDe(pr.id);
+      if (g) {
+        $('numero').textContent = g.numero;
+        pintarGanador(g);
+        mostrar('sortear', false);
+        mostrar('anular', true);
+        const sig = siguientePendiente(pr.id);
+        mostrar('siguiente', !!sig);
+      } else {
+        const n = candidatos(pr).length;
+        $('numero').textContent = '?';
+        $('ganador').innerHTML = n
+          ? `<div class="estado-juego">${n} ${n === 1 ? 'participante' : 'participantes'} en juego</div>`
+          : `<div class="estado-juego">No hay asistentes disponibles para este premio.</div>`;
+        mostrar('sortear', true);
+        $('sortear').disabled = n === 0;
+        mostrar('anular', false);
+        mostrar('siguiente', false);
+      }
+    }
+
+    function pintarGanador(g) {
+      $('ganador').innerHTML = `
+        <div class="titulo">¡Felicitaciones!</div>
+        <div class="nombre">${esc(g.nombres)} ${esc(g.apellidos)}</div>
+        <div class="cargo">${esc([g.cargo, g.empresa].filter(Boolean).join(' · '))}</div>`;
+    }
+
+    $('lista-premios').addEventListener('click', (e) => {
+      const boton = e.target.closest('button[data-premio]');
+      if (!boton || estado.girando) return;
+      estado.actual = Number(boton.dataset.premio);
+      pintar();
+    });
+
+    $('siguiente').addEventListener('click', irSiguiente);
+
+    function irSiguiente() {
+      if (estado.girando) return;
+      const sig = siguientePendiente(estado.actual);
+      if (!sig) return;
+      estado.actual = sig.id;
+      pintar();
+    }
+
+    // ---------------------------------------------------------------
+    // Sorteo
+    // ---------------------------------------------------------------
+    // Muestra números al azar del grupo y se detiene en el número que eligió el servidor
+    function iniciarGiro(numeros) {
+      const caja = $('numero');
+      const inicio = performance.now();
+      let activo = true;
+      let destino = null;
+      let espera = 55;
+      let alTerminar = null;
+
+      function paso() {
+        if (!activo) return;
+        caja.textContent = numeros[Math.floor(Math.random() * numeros.length)];
+        if (destino !== null) {
+          espera *= 1.14;
+          if (espera > 450) {
+            activo = false;
+            caja.textContent = destino;
+            alTerminar();
+            return;
+          }
+        }
+        setTimeout(paso, espera);
+      }
+      paso();
+
+      return {
+        detener() { activo = false; },
+        terminarEn(numero) {
+          return new Promise((resolver) => {
+            alTerminar = resolver;
+            const restante = Math.max(0, 1800 - (performance.now() - inicio));
+            setTimeout(() => { destino = numero; }, restante);
+          });
+        }
+      };
+    }
+
+    async function sortear() {
+      const pr = premioActual();
+      if (!pr || estado.girando || ganadorDe(pr.id)) return;
+      const grupo = candidatos(pr);
+      if (!grupo.length) return;
+
+      estado.girando = true;
+      $('sortear').disabled = true;
+      $('escenario').classList.add('girando');
+      $('ganador').innerHTML = '<div class="estado-juego">Sorteando…</div>';
+      pintarLista();
+
+      const giro = iniciarGiro(grupo.map((p) => p.numero));
+      const { data, error } = await db.rpc('sortear', { p_premio_id: pr.id });
+
+      if (error) {
+        giro.detener();
+        estado.girando = false;
+        aviso(error.message, true);
+        await cargarDatos(true);
+        pintar();
+        return;
+      }
+
+      await giro.terminarEn(data.numero);
+
+      // Actualiza el estado local con el ganador
+      estado.ganadores.push({ premio_id: pr.id, numero: data.numero });
+      const p = estado.participantes.find((x) => x.numero === data.numero);
+      if (p) p.ya_gano = true;
+      else estado.participantes.push({ ...data, asistio: true, ya_gano: true });
+
+      estado.girando = false;
+      const escenario = $('escenario');
+      escenario.classList.remove('girando');
+      void escenario.offsetWidth;
+      escenario.classList.add('revelado');
+      pintarGanador(data);
+      mostrar('sortear', false);
+      mostrar('anular', true);
+      mostrar('siguiente', !!siguientePendiente(pr.id));
+      pintarLista();
+      lanzarConfeti();
+    }
+
+    $('sortear').addEventListener('click', sortear);
+
+    // ---------------------------------------------------------------
+    // Anular ganador
+    // ---------------------------------------------------------------
+    $('anular').addEventListener('click', () => mostrar('anular-caja', true));
+    $('anular-cancelar').addEventListener('click', () => mostrar('anular-caja', false));
+    $('anular-ausente').addEventListener('click', () => anular(true));
+    $('anular-error').addEventListener('click', () => anular(false));
+
+    async function anular(sacarDelSorteo) {
+      const pr = premioActual();
+      const g = pr && estado.ganadores.find((x) => x.premio_id === pr.id);
+      if (!g) return;
+
+      if (sacarDelSorteo) {
+        const r1 = await db.from('registros')
+          .update({ asistio: false, fecha_asistencia: null })
+          .eq('numero', g.numero);
+        if (r1.error) { aviso('No se pudo actualizar la asistencia: ' + r1.error.message, true); return; }
+      }
+
+      const r2 = await db.from('ganadores').delete().eq('premio_id', pr.id);
+      if (r2.error) { aviso('No se pudo anular: ' + r2.error.message, true); return; }
+
+      aviso(sacarDelSorteo
+        ? `El N.º ${g.numero} sale del sorteo. El premio queda libre.`
+        : 'Ganador anulado. El premio queda libre.');
+      await cargarDatos(false);
+    }
+
+    // ---------------------------------------------------------------
+    // Teclado: Espacio/Enter = sortear, Flecha derecha = siguiente
+    // ---------------------------------------------------------------
+    document.addEventListener('keydown', (e) => {
+      if (!estado.sesion || e.target.closest('input, textarea, select')) return;
+      if ((e.code === 'Space' || e.code === 'Enter') && !$('sortear').classList.contains('oculto') && !$('sortear').disabled) {
+        e.preventDefault();
+        sortear();
+      } else if (e.code === 'ArrowRight' && !$('siguiente').classList.contains('oculto')) {
+        e.preventDefault();
+        irSiguiente();
+      }
+    });
+
+    // ---------------------------------------------------------------
+    // Confeti (sin librerías)
+    // ---------------------------------------------------------------
+    function lanzarConfeti() {
+      const lienzo = $('confeti');
+      const ctx = lienzo.getContext('2d');
+      const escala = window.devicePixelRatio || 1;
+      lienzo.width = innerWidth * escala;
+      lienzo.height = innerHeight * escala;
+      ctx.scale(escala, escala);
+
+      const colores = ['#d9a441', '#f1c96b', '#ffffff', '#5fd08f', '#7fb2ff', '#ff8a80'];
+      const piezas = Array.from({ length: 180 }, () => ({
+        x: innerWidth / 2 + (Math.random() - .5) * 200,
+        y: innerHeight * .45,
+        vx: (Math.random() - .5) * 16,
+        vy: -Math.random() * 16 - 6,
+        giro: Math.random() * Math.PI,
+        vgiro: (Math.random() - .5) * .3,
+        ancho: 6 + Math.random() * 6,
+        alto: 10 + Math.random() * 8,
+        color: colores[Math.floor(Math.random() * colores.length)]
+      }));
+
+      const inicio = performance.now();
+      function cuadro(t) {
+        const transcurrido = t - inicio;
+        ctx.clearRect(0, 0, innerWidth, innerHeight);
+        piezas.forEach((p) => {
+          p.vy += .35;
+          p.vx *= .99;
+          p.x += p.vx;
+          p.y += p.vy;
+          p.giro += p.vgiro;
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, 1 - transcurrido / 4000);
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.giro);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.ancho / 2, -p.alto / 2, p.ancho, p.alto);
+          ctx.restore();
+        });
+        if (transcurrido < 4000) requestAnimationFrame(cuadro);
+        else ctx.clearRect(0, 0, innerWidth, innerHeight);
+      }
+      requestAnimationFrame(cuadro);
+    }
+
+    verificarSesion();
+  </script>
+</body>
+</html>
