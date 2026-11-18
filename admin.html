@@ -1,0 +1,1116 @@
+<!doctype html>
+<!-- =====================================================================
+     Fiesta fin de año 2026 - Panel de administración
+     Ruta en el repositorio: admin.html
+     Uso: solo usuarios con rol "admin"
+     Secciones: Resumen, Registrados, Premios, Usuarios
+     ===================================================================== -->
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel - Fiesta fin de año 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --fondo: #0f1d33;
+      --fondo-2: #16294a;
+      --pagina: #f3f5f9;
+      --tarjeta: #ffffff;
+      --texto: #1b2433;
+      --texto-suave: #5b6576;
+      --borde: #dfe3ea;
+      --dorado: #d9a441;
+      --dorado-oscuro: #a8761c;
+      --verde: #1e7a46;
+      --verde-fondo: #e6f4ec;
+      --ambar: #8a5a00;
+      --ambar-fondo: #fff4dc;
+      --rojo: #b3261e;
+      --rojo-fondo: #fdecea;
+      --radio: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      color: var(--texto);
+      background: var(--pagina);
+    }
+
+    /* ---------- Encabezado ---------- */
+    header.barra {
+      background: linear-gradient(160deg, var(--fondo) 0%, var(--fondo-2) 100%);
+      color: #fff;
+      padding: 16px 16px 0;
+    }
+    .barra-interna {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding-bottom: 14px;
+    }
+    .marca small {
+      display: block;
+      color: var(--dorado);
+      font-size: 11px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    .marca strong { font-family: 'Fraunces', Georgia, serif; font-size: 22px; font-weight: 800; }
+    .usuario { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; color: #c9d2e3; }
+    .usuario button { background: transparent; color: var(--dorado); border: 1px solid rgba(217,164,65,.5); }
+
+    nav.pestanas {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+    }
+    nav.pestanas button {
+      background: transparent;
+      color: #c9d2e3;
+      border-radius: 10px 10px 0 0;
+      padding: 10px 16px;
+      white-space: nowrap;
+    }
+    nav.pestanas button:hover { color: #fff; }
+    nav.pestanas button.activa { background: var(--pagina); color: var(--texto); }
+
+    main { max-width: 1100px; margin: 0 auto; padding: 20px 16px 48px; }
+
+    /* ---------- Componentes ---------- */
+    .tarjeta {
+      background: var(--tarjeta);
+      border: 1px solid var(--borde);
+      border-radius: var(--radio);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    h2 { font-size: 17px; margin: 0 0 6px; }
+    .ayuda { color: var(--texto-suave); font-size: 13px; line-height: 1.5; margin: 0 0 14px; }
+
+    .cifras {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .cifra {
+      background: var(--tarjeta);
+      border: 1px solid var(--borde);
+      border-radius: var(--radio);
+      padding: 16px 18px;
+    }
+    .cifra span {
+      font-size: 12px;
+      color: var(--texto-suave);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    .cifra strong {
+      display: block;
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 700;
+      font-size: 34px;
+      line-height: 1.15;
+      margin: 6px 0 2px;
+      font-variant-numeric: tabular-nums;
+    }
+    .cifra small { color: var(--texto-suave); font-size: 13px; }
+
+    .tabla-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .tabla-scroll table { min-width: 640px; }
+    #tab-registrados .tabla-scroll table { min-width: 900px; }
+    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--borde); vertical-align: middle; }
+    th {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--texto-suave);
+      white-space: nowrap;
+    }
+    th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    tfoot td { font-weight: 600; border-bottom: none; }
+    td .sub { color: var(--texto-suave); font-size: 12.5px; margin-top: 2px; }
+    td.vacio { text-align: center; color: var(--texto-suave); padding: 28px 8px; }
+
+    label.campo { display: block; font-weight: 600; font-size: 13px; margin-bottom: 6px; }
+    input, select, textarea {
+      width: 100%;
+      font: inherit;
+      font-size: 15px;
+      padding: 10px 12px;
+      border: 1.5px solid var(--borde);
+      border-radius: 10px;
+      background: #fff;
+      color: inherit;
+      outline: none;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--dorado); }
+
+    .rejilla {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    button {
+      font: inherit;
+      font-weight: 600;
+      font-size: 14px;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 10px;
+      background: var(--dorado);
+      color: #1b1406;
+      cursor: pointer;
+    }
+    button:hover { filter: brightness(1.05); }
+    button:disabled { opacity: .6; cursor: wait; }
+    button.secundario { background: #fff; color: var(--texto); border: 1.5px solid var(--borde); }
+    button.peligro { background: #fff; color: var(--rojo); border: 1.5px solid #f1c4c0; }
+    button.mini { padding: 6px 10px; font-size: 13px; }
+
+    .acciones { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .herramientas { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+    .herramientas input { flex: 1 1 240px; width: auto; }
+    .herramientas select { width: auto; flex: 0 1 auto; }
+
+    .chip {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .chip.si { background: var(--verde-fondo); color: var(--verde); }
+    .chip.no { background: #eef1f6; color: var(--texto-suave); }
+    .chip.gano { background: var(--ambar-fondo); color: var(--ambar); }
+
+    .estado-registro {
+      display: inline-block;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 999px;
+      margin-bottom: 14px;
+    }
+    .estado-registro.abierto { background: var(--verde-fondo); color: var(--verde); }
+    .estado-registro.cerrado { background: #eef1f6; color: var(--texto-suave); }
+    .estado-registro.pendiente { background: var(--ambar-fondo); color: var(--ambar); }
+
+    .login { max-width: 400px; margin: 40px auto; }
+    .mensaje {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      background: var(--rojo-fondo);
+      color: var(--rojo);
+    }
+
+    .aviso {
+      position: fixed;
+      left: 50%;
+      bottom: 20px;
+      transform: translateX(-50%);
+      max-width: calc(100% - 32px);
+      background: var(--texto);
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      z-index: 10;
+    }
+    .aviso.error { background: var(--rojo); }
+
+    .oculto { display: none !important; }
+  </style>
+</head>
+<body>
+  <header class="barra">
+    <div class="barra-interna">
+      <div class="marca">
+        <small>Panel de administración</small>
+        <strong id="titulo-evento">Fiesta fin de año 2026</strong>
+      </div>
+      <div class="usuario oculto" id="zona-usuario">
+        <span id="correo-usuario"></span>
+        <button type="button" class="mini" id="actualizar">Actualizar datos</button>
+        <button type="button" class="mini" id="salir">Cerrar sesión</button>
+      </div>
+    </div>
+    <nav class="pestanas oculto" id="pestanas">
+      <button type="button" data-tab="resumen" class="activa">Resumen</button>
+      <button type="button" data-tab="registrados">Registrados</button>
+      <button type="button" data-tab="premios">Premios</button>
+      <button type="button" data-tab="usuarios">Usuarios</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ================= Inicio de sesión ================= -->
+    <section class="tarjeta login" id="vista-login">
+      <h2>Iniciar sesión</h2>
+      <p class="ayuda">Acceso exclusivo para administradores.</p>
+      <form id="form-login" novalidate>
+        <label class="campo" for="correo">Correo</label>
+        <input type="email" id="correo" autocomplete="username" required>
+        <div style="height:12px"></div>
+        <label class="campo" for="clave">Contraseña</label>
+        <input type="password" id="clave" autocomplete="current-password" required>
+        <div style="height:16px"></div>
+        <button type="submit" id="boton-login" style="width:100%">Entrar</button>
+        <div class="mensaje oculto" id="mensaje-login" role="alert"></div>
+      </form>
+    </section>
+
+    <!-- ================= Resumen ================= -->
+    <section class="oculto" id="tab-resumen">
+      <div class="cifras">
+        <div class="cifra">
+          <span>Nómina cargada</span>
+          <strong id="c-nomina">0</strong>
+          <small>colaboradores habilitados</small>
+        </div>
+        <div class="cifra">
+          <span>Registrados</span>
+          <strong id="c-registrados">0</strong>
+          <small id="c-registrados-pct"></small>
+        </div>
+        <div class="cifra">
+          <span>Asistentes</span>
+          <strong id="c-asistentes">0</strong>
+          <small id="c-asistentes-pct"></small>
+        </div>
+        <div class="cifra">
+          <span>Premios</span>
+          <strong id="c-premios">0</strong>
+          <small>sorteados / creados</small>
+        </div>
+      </div>
+
+      <div class="tarjeta">
+        <h2>Participantes por grupo</h2>
+        <p class="ayuda">Disponibles = llegaron al evento y aún no han ganado ningún premio.</p>
+        <div class="tabla-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Tipo de personal</th>
+                <th>Rango de antigüedad</th>
+                <th class="num">Registrados</th>
+                <th class="num">Asistentes</th>
+                <th class="num">Disponibles</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-grupos"></tbody>
+            <tfoot id="pie-grupos"></tfoot>
+          </table>
+        </div>
+      </div>
+
+      <div class="tarjeta">
+        <h2>Configuración del evento</h2>
+        <span class="estado-registro" id="estado-registro"></span>
+        <form id="form-evento" novalidate>
+          <div class="rejilla">
+            <div>
+              <label class="campo" for="ev-inicio">Apertura del registro</label>
+              <input type="datetime-local" id="ev-inicio" required>
+            </div>
+            <div>
+              <label class="campo" for="ev-fin">Cierre del registro</label>
+              <input type="datetime-local" id="ev-fin" required>
+            </div>
+            <div>
+              <label class="campo" for="ev-corte">Fecha de corte de antigüedad</label>
+              <input type="date" id="ev-corte" required>
+            </div>
+          </div>
+          <p class="ayuda">Horas de Colombia. La fecha de corte define en qué rango de antigüedad queda cada colaborador.</p>
+          <button type="submit" id="guardar-evento">Guardar configuración</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ================= Registrados ================= -->
+    <section class="oculto" id="tab-registrados">
+      <div class="tarjeta">
+        <div class="herramientas">
+          <input type="search" id="buscar" placeholder="Buscar por nombre, cédula o número" autocomplete="off">
+          <select id="filtro-asistencia" aria-label="Filtrar por asistencia">
+            <option value="">Todos</option>
+            <option value="si">Llegaron al evento</option>
+            <option value="no">No han llegado</option>
+          </select>
+          <select id="filtro-tipo" aria-label="Filtrar por tipo de personal">
+            <option value="">Todos los tipos</option>
+            <option value="Asistencial">Asistencial</option>
+            <option value="Administrativo">Administrativo</option>
+          </select>
+          <select id="filtro-rango" aria-label="Filtrar por antigüedad">
+            <option value="">Toda antigüedad</option>
+          </select>
+          <button type="button" class="secundario" id="exportar">Exportar a Excel</button>
+        </div>
+        <p class="ayuda" id="conteo-registrados"></p>
+        <div class="tabla-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th class="num">N.º</th>
+                <th>Identificación</th>
+                <th>Colaborador</th>
+                <th>Tipo</th>
+                <th>Antigüedad</th>
+                <th>Registro</th>
+                <th>Asistencia</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tabla-registrados"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= Premios ================= -->
+    <section class="oculto" id="tab-premios">
+      <div class="tarjeta">
+        <h2 id="titulo-form-premio">Nuevo premio</h2>
+        <p class="ayuda">Deje "Tipo de personal" y "Antigüedad" en "Todos" si el premio es para cualquier asistente.</p>
+        <form id="form-premio" novalidate>
+          <input type="hidden" id="premio-id">
+          <div class="rejilla">
+            <div>
+              <label class="campo" for="premio-nombre">Premio</label>
+              <input type="text" id="premio-nombre" placeholder="Ej.: Televisor 50 pulgadas" required>
+            </div>
+            <div>
+              <label class="campo" for="premio-orden">Orden en el sorteo</label>
+              <input type="number" id="premio-orden" min="0" step="1">
+            </div>
+            <div>
+              <label class="campo" for="premio-tipo">Tipo de personal</label>
+              <select id="premio-tipo">
+                <option value="">Todos</option>
+                <option value="Asistencial">Solo asistencial</option>
+                <option value="Administrativo">Solo administrativo</option>
+              </select>
+            </div>
+            <div>
+              <label class="campo" for="premio-rango">Antigüedad</label>
+              <select id="premio-rango">
+                <option value="">Todos los rangos</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-bottom:14px">
+            <label class="campo" for="premio-descripcion">Descripción (opcional)</label>
+            <input type="text" id="premio-descripcion" placeholder="Ej.: Donado por la Gerencia">
+          </div>
+          <div class="acciones">
+            <button type="submit" id="guardar-premio">Guardar premio</button>
+            <button type="button" class="secundario oculto" id="cancelar-premio">Cancelar edición</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="tarjeta">
+        <h2>Premios</h2>
+        <p class="ayuda">Elegibles = asistentes que cumplen el filtro del premio y aún no han ganado.</p>
+        <div class="tabla-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th class="num">Orden</th>
+                <th>Premio</th>
+                <th>Para</th>
+                <th class="num">Elegibles</th>
+                <th>Ganador</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tabla-premios"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= Usuarios ================= -->
+    <section class="oculto" id="tab-usuarios">
+      <div class="tarjeta">
+        <h2>Usuarios con acceso</h2>
+        <p class="ayuda">
+          <strong>Ingreso:</strong> solo puede marcar llegadas en la página de ingreso.
+          <strong>Administrador:</strong> acceso a este panel y al sorteo.<br>
+          Para agregar a alguien: en Supabase entre a Authentication &gt; Users &gt; Add user (con "Auto Confirm User"),
+          luego toque "Actualizar datos" aquí y asígnele el rol.
+        </p>
+        <div class="tabla-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Correo</th>
+                <th>Nombre</th>
+                <th>Rol</th>
+                <th>Último ingreso</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tabla-usuarios"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="aviso oculto" id="aviso" role="status"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="js/config.js"></script>
+  <script>
+    const cfg = window.APP_CONFIG;
+    const db = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_KEY);
+    const $ = (id) => document.getElementById(id);
+    const ZONA = 'America/Bogota';
+    const TABS = ['resumen', 'registrados', 'premios', 'usuarios'];
+
+    const estado = {
+      participantes: [],
+      premios: [],
+      ganadores: [],
+      rangos: [],
+      usuarios: [],
+      evento: null,
+      totalNomina: 0,
+      miId: null,
+      tab: 'resumen'
+    };
+
+    $('titulo-evento').textContent = cfg.EVENTO_NOMBRE;
+
+    // ---------------------------------------------------------------
+    // Utilidades
+    // ---------------------------------------------------------------
+    function esc(valor) {
+      return String(valor ?? '').replace(/[&<>"']/g, (c) => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+      ));
+    }
+
+    function mostrar(id, visible) { $(id).classList.toggle('oculto', !visible); }
+
+    let temporizadorAviso = null;
+    function aviso(texto, esError) {
+      const caja = $('aviso');
+      caja.textContent = texto;
+      caja.className = 'aviso' + (esError ? ' error' : '');
+      clearTimeout(temporizadorAviso);
+      temporizadorAviso = setTimeout(() => caja.classList.add('oculto'), 4000);
+    }
+
+    function fechaHora(ts) {
+      if (!ts) return '';
+      return new Date(ts).toLocaleString('es-CO', {
+        timeZone: ZONA, day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+    }
+
+    function hora(ts) {
+      if (!ts) return '';
+      return new Date(ts).toLocaleTimeString('es-CO', { timeZone: ZONA, hour: '2-digit', minute: '2-digit' });
+    }
+
+    // timestamptz -> valor para <input type="datetime-local"> en hora de Colombia
+    function aInputLocal(ts) {
+      const partes = {};
+      new Intl.DateTimeFormat('en-CA', {
+        timeZone: ZONA, year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
+      }).formatToParts(new Date(ts)).forEach((p) => { partes[p.type] = p.value; });
+      return `${partes.year}-${partes.month}-${partes.day}T${partes.hour}:${partes.minute}`;
+    }
+
+    // Colombia no tiene horario de verano: siempre UTC-05:00
+    function deInputLocal(valor) { return valor + ':00-05:00'; }
+
+    function porcentaje(a, b) { return b ? Math.round((a * 100) / b) + '%' : '0%'; }
+
+    function normalizar(texto) {
+      return String(texto ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    }
+
+    function nombreRango(id) {
+      const r = estado.rangos.find((x) => x.id === id);
+      return r ? r.nombre : '';
+    }
+
+    // Trae todas las filas (Supabase devuelve máximo 1000 por consulta)
+    async function traerTodo(tabla, orden) {
+      const filas = [];
+      const paso = 1000;
+      for (let desde = 0; ; desde += paso) {
+        let consulta = db.from(tabla).select('*').range(desde, desde + paso - 1);
+        if (orden) consulta = consulta.order(orden, { ascending: true });
+        const { data, error } = await consulta;
+        if (error) throw error;
+        filas.push(...data);
+        if (data.length < paso) break;
+      }
+      return filas;
+    }
+
+    // ---------------------------------------------------------------
+    // Sesión
+    // ---------------------------------------------------------------
+    function vistaLogin(textoError) {
+      mostrar('zona-usuario', false);
+      mostrar('pestanas', false);
+      TABS.forEach((t) => mostrar('tab-' + t, false));
+      mostrar('vista-login', true);
+      $('mensaje-login').textContent = textoError || '';
+      mostrar('mensaje-login', !!textoError);
+    }
+
+    async function verificarSesion() {
+      const { data: { session } } = await db.auth.getSession();
+      if (!session) { vistaLogin(); return; }
+
+      const { data: rol, error } = await db.rpc('mi_rol');
+      if (error || rol !== 'admin') {
+        vistaLogin(rol === 'ingreso'
+          ? 'Su usuario solo tiene acceso a la página de ingreso (ingreso.html).'
+          : 'Este usuario no tiene permiso para el panel de administración.');
+        return;
+      }
+
+      estado.miId = session.user.id;
+      $('correo-usuario').textContent = session.user.email;
+      mostrar('vista-login', false);
+      mostrar('zona-usuario', true);
+      mostrar('pestanas', true);
+      cambiarTab(estado.tab);
+      await cargarDatos();
+    }
+
+    $('form-login').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      mostrar('mensaje-login', false);
+      const boton = $('boton-login');
+      boton.disabled = true;
+      boton.textContent = 'Entrando...';
+
+      const { error } = await db.auth.signInWithPassword({
+        email: $('correo').value.trim(),
+        password: $('clave').value
+      });
+
+      boton.disabled = false;
+      boton.textContent = 'Entrar';
+
+      if (error) {
+        const m = (error.message || '').toLowerCase();
+        vistaLogin(m.includes('invalid login credentials')
+          ? 'Correo o contraseña incorrectos.'
+          : 'Error al iniciar sesión: ' + error.message);
+        return;
+      }
+      $('clave').value = '';
+      verificarSesion();
+    });
+
+    $('salir').addEventListener('click', async () => {
+      await db.auth.signOut();
+      vistaLogin();
+    });
+
+    // ---------------------------------------------------------------
+    // Pestañas y carga de datos
+    // ---------------------------------------------------------------
+    function cambiarTab(tab) {
+      estado.tab = tab;
+      document.querySelectorAll('#pestanas button').forEach((b) => {
+        b.classList.toggle('activa', b.dataset.tab === tab);
+      });
+      TABS.forEach((t) => mostrar('tab-' + t, t === tab));
+    }
+
+    $('pestanas').addEventListener('click', (e) => {
+      const boton = e.target.closest('button[data-tab]');
+      if (boton) cambiarTab(boton.dataset.tab);
+    });
+
+    async function cargarDatos() {
+      const boton = $('actualizar');
+      boton.disabled = true;
+      try {
+        const [participantes, premios, ganadores, rangos, eventoRes, nominaRes, usuariosRes] = await Promise.all([
+          traerTodo('v_participantes', 'numero'),
+          traerTodo('premios', 'orden'),
+          traerTodo('ganadores', 'id'),
+          traerTodo('rangos_antiguedad', 'id'),
+          db.from('evento').select('*').eq('id', 1).single(),
+          db.from('nomina').select('identificacion', { count: 'exact', head: true }),
+          db.rpc('listar_usuarios')
+        ]);
+        if (eventoRes.error) throw eventoRes.error;
+        if (nominaRes.error) throw nominaRes.error;
+        if (usuariosRes.error) throw usuariosRes.error;
+
+        estado.participantes = participantes;
+        estado.premios = premios.sort((a, b) => (a.orden - b.orden) || (a.id - b.id));
+        estado.ganadores = ganadores;
+        estado.rangos = rangos;
+        estado.evento = eventoRes.data;
+        estado.totalNomina = nominaRes.count || 0;
+        estado.usuarios = usuariosRes.data || [];
+
+        llenarSelectRangos();
+        pintarCifras();
+        pintarEvento();
+        pintarRegistrados();
+        pintarPremios();
+        pintarUsuarios();
+      } catch (err) {
+        console.error(err);
+        aviso('No se pudieron cargar los datos: ' + (err.message || err), true);
+      } finally {
+        boton.disabled = false;
+      }
+    }
+
+    $('actualizar').addEventListener('click', cargarDatos);
+
+    function llenarSelectRangos() {
+      ['filtro-rango', 'premio-rango'].forEach((id) => {
+        const select = $(id);
+        const actual = select.value;
+        const primera = select.options[0].outerHTML;
+        select.innerHTML = primera + estado.rangos
+          .map((r) => `<option value="${r.id}">${esc(r.nombre)}</option>`)
+          .join('');
+        select.value = actual;
+      });
+    }
+
+    // ---------------------------------------------------------------
+    // Resumen
+    // ---------------------------------------------------------------
+    function pintarCifras() {
+      const P = estado.participantes;
+      const registrados = P.length;
+      const asistentes = P.filter((p) => p.asistio).length;
+
+      $('c-nomina').textContent = estado.totalNomina;
+      $('c-registrados').textContent = registrados;
+      $('c-registrados-pct').textContent = porcentaje(registrados, estado.totalNomina) + ' de la nómina';
+      $('c-asistentes').textContent = asistentes;
+      $('c-asistentes-pct').textContent = porcentaje(asistentes, registrados) + ' de los registrados';
+      $('c-premios').textContent = estado.ganadores.length + ' / ' + estado.premios.length;
+
+      // Tabla por grupo: tipo de personal x rango de antigüedad
+      const tipos = ['Asistencial', 'Administrativo'];
+      if (P.some((p) => !p.tipo_personal)) tipos.push(null);
+      const rangos = estado.rangos.map((r) => r.id);
+      if (P.some((p) => !p.rango_id)) rangos.push(null);
+
+      let filas = '';
+      const total = { reg: 0, asis: 0, disp: 0 };
+      tipos.forEach((tipo) => {
+        rangos.forEach((rango) => {
+          const grupo = P.filter((p) => (p.tipo_personal || null) === tipo && (p.rango_id || null) === rango);
+          if ((tipo === null || rango === null) && grupo.length === 0) return;
+          const reg = grupo.length;
+          const asis = grupo.filter((p) => p.asistio).length;
+          const disp = grupo.filter((p) => p.asistio && !p.ya_gano).length;
+          total.reg += reg; total.asis += asis; total.disp += disp;
+          filas += `<tr>
+            <td>${esc(tipo || 'Sin tipo')}</td>
+            <td>${esc(rango ? nombreRango(rango) : 'Sin fecha de vinculación')}</td>
+            <td class="num">${reg}</td>
+            <td class="num">${asis}</td>
+            <td class="num">${disp}</td>
+          </tr>`;
+        });
+      });
+      $('tabla-grupos').innerHTML = filas;
+      $('pie-grupos').innerHTML = `<tr>
+        <td colspan="2">Total</td>
+        <td class="num">${total.reg}</td>
+        <td class="num">${total.asis}</td>
+        <td class="num">${total.disp}</td>
+      </tr>`;
+    }
+
+    function pintarEvento() {
+      const ev = estado.evento;
+      if (!ev) return;
+      $('ev-inicio').value = aInputLocal(ev.registro_inicio);
+      $('ev-fin').value = aInputLocal(ev.registro_fin);
+      $('ev-corte').value = ev.fecha_corte_antiguedad;
+
+      const ahora = new Date();
+      const inicio = new Date(ev.registro_inicio);
+      const fin = new Date(ev.registro_fin);
+      const etiqueta = $('estado-registro');
+      if (ahora < inicio) {
+        etiqueta.className = 'estado-registro pendiente';
+        etiqueta.textContent = 'El registro abre el ' + fechaHora(inicio);
+      } else if (ahora > fin) {
+        etiqueta.className = 'estado-registro cerrado';
+        etiqueta.textContent = 'Registro cerrado desde el ' + fechaHora(fin);
+      } else {
+        etiqueta.className = 'estado-registro abierto';
+        etiqueta.textContent = 'Registro abierto hasta el ' + fechaHora(fin);
+      }
+    }
+
+    $('form-evento').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const inicio = $('ev-inicio').value;
+      const fin = $('ev-fin').value;
+      const corte = $('ev-corte').value;
+      if (!inicio || !fin || !corte) { aviso('Complete las tres fechas.', true); return; }
+      if (fin <= inicio) { aviso('El cierre debe ser posterior a la apertura.', true); return; }
+
+      const boton = $('guardar-evento');
+      boton.disabled = true;
+      const { error } = await db.from('evento').update({
+        registro_inicio: deInputLocal(inicio),
+        registro_fin: deInputLocal(fin),
+        fecha_corte_antiguedad: corte
+      }).eq('id', 1);
+      boton.disabled = false;
+
+      if (error) { aviso('No se pudo guardar: ' + error.message, true); return; }
+      aviso('Configuración guardada.');
+      cargarDatos();
+    });
+
+    // ---------------------------------------------------------------
+    // Registrados
+    // ---------------------------------------------------------------
+    function filtrarRegistrados() {
+      const texto = normalizar($('buscar').value.trim());
+      const asistencia = $('filtro-asistencia').value;
+      const tipo = $('filtro-tipo').value;
+      const rango = $('filtro-rango').value;
+
+      return estado.participantes.filter((p) => {
+        if (asistencia === 'si' && !p.asistio) return false;
+        if (asistencia === 'no' && p.asistio) return false;
+        if (tipo && p.tipo_personal !== tipo) return false;
+        if (rango && String(p.rango_id) !== rango) return false;
+        if (!texto) return true;
+        return normalizar(p.nombres + ' ' + p.apellidos).includes(texto)
+          || String(p.identificacion).includes(texto)
+          || String(p.numero) === texto;
+      });
+    }
+
+    function pintarRegistrados() {
+      const lista = filtrarRegistrados();
+      $('conteo-registrados').textContent =
+        `Mostrando ${lista.length} de ${estado.participantes.length} registrados.`;
+
+      if (!lista.length) {
+        $('tabla-registrados').innerHTML = '<tr><td colspan="8" class="vacio">No hay registros con ese filtro.</td></tr>';
+        return;
+      }
+
+      $('tabla-registrados').innerHTML = lista.map((p) => `<tr>
+        <td class="num"><strong>${p.numero}</strong></td>
+        <td>${esc(p.identificacion)}</td>
+        <td>
+          ${esc(p.nombres)} ${esc(p.apellidos)}
+          <div class="sub">${esc([p.cargo, p.empresa].filter(Boolean).join(' · '))}</div>
+        </td>
+        <td>${esc(p.tipo_personal || '—')}</td>
+        <td>${esc(p.rango_nombre || '—')}</td>
+        <td>${fechaHora(p.fecha_registro)}</td>
+        <td>
+          ${p.asistio
+            ? `<span class="chip si">Llegó ${hora(p.fecha_asistencia)}</span>`
+            : '<span class="chip no">No ha llegado</span>'}
+          ${p.ya_gano ? '<span class="chip gano">Ganador</span>' : ''}
+        </td>
+        <td>
+          <button type="button" class="mini secundario" data-asistencia="${p.numero}">
+            ${p.asistio ? 'Quitar llegada' : 'Marcar llegada'}
+          </button>
+        </td>
+      </tr>`).join('');
+    }
+
+    ['buscar', 'filtro-asistencia', 'filtro-tipo', 'filtro-rango'].forEach((id) => {
+      $(id).addEventListener('input', pintarRegistrados);
+    });
+
+    $('tabla-registrados').addEventListener('click', async (e) => {
+      const boton = e.target.closest('button[data-asistencia]');
+      if (!boton) return;
+      const numero = Number(boton.dataset.asistencia);
+      const p = estado.participantes.find((x) => x.numero === numero);
+      if (!p) return;
+
+      const nuevo = !p.asistio;
+      if (!nuevo && !confirm(`¿Quitar la llegada de ${p.nombres} ${p.apellidos} (N.º ${p.numero})?`)) return;
+
+      boton.disabled = true;
+      const fecha = nuevo ? new Date().toISOString() : null;
+      const { error } = await db.from('registros')
+        .update({ asistio: nuevo, fecha_asistencia: fecha })
+        .eq('numero', numero);
+
+      if (error) {
+        boton.disabled = false;
+        aviso('No se pudo actualizar: ' + error.message, true);
+        return;
+      }
+
+      p.asistio = nuevo;
+      p.fecha_asistencia = fecha;
+      pintarRegistrados();
+      pintarCifras();
+      pintarPremios();
+      aviso(nuevo ? 'Llegada registrada.' : 'Llegada retirada.');
+    });
+
+    $('exportar').addEventListener('click', () => {
+      const lista = filtrarRegistrados();
+      if (!lista.length) { aviso('No hay datos para exportar con ese filtro.', true); return; }
+      if (!window.XLSX) { aviso('No se pudo cargar el componente de Excel. Revise la conexión.', true); return; }
+
+      const filas = lista.map((p) => ({
+        'Número': p.numero,
+        'Identificación': p.identificacion,
+        'Nombres': p.nombres,
+        'Apellidos': p.apellidos,
+        'Cargo': p.cargo || '',
+        'Empresa': p.empresa || '',
+        'Tipo de personal': p.tipo_personal || '',
+        'Fecha de vinculación': p.fecha_vinculacion || '',
+        'Rango de antigüedad': p.rango_nombre || '',
+        'Fecha de registro': fechaHora(p.fecha_registro),
+        'Asistió': p.asistio ? 'Sí' : 'No',
+        'Hora de llegada': p.asistio ? fechaHora(p.fecha_asistencia) : '',
+        'Ganó premio': p.ya_gano ? 'Sí' : 'No'
+      }));
+
+      const hoja = XLSX.utils.json_to_sheet(filas);
+      hoja['!cols'] = [8, 14, 22, 24, 26, 40, 16, 16, 26, 18, 8, 18, 12].map((w) => ({ wch: w }));
+      const libro = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(libro, hoja, 'Registrados');
+      const hoy = aInputLocal(new Date()).slice(0, 10);
+      XLSX.writeFile(libro, `registrados-fiesta-${hoy}.xlsx`);
+    });
+
+    // ---------------------------------------------------------------
+    // Premios
+    // ---------------------------------------------------------------
+    function elegibles(premio) {
+      return estado.participantes.filter((p) =>
+        p.asistio && !p.ya_gano
+        && (!premio.tipo_personal || p.tipo_personal === premio.tipo_personal)
+        && (!premio.rango_antiguedad || p.rango_id === premio.rango_antiguedad)
+      ).length;
+    }
+
+    function siguienteOrden() {
+      return estado.premios.reduce((max, p) => Math.max(max, p.orden || 0), 0) + 1;
+    }
+
+    function limpiarFormPremio() {
+      $('form-premio').reset();
+      $('premio-id').value = '';
+      $('premio-orden').value = siguienteOrden();
+      $('titulo-form-premio').textContent = 'Nuevo premio';
+      mostrar('cancelar-premio', false);
+    }
+
+    function pintarPremios() {
+      if (!$('premio-id').value) $('premio-orden').value = siguienteOrden();
+
+      if (!estado.premios.length) {
+        $('tabla-premios').innerHTML = '<tr><td colspan="6" class="vacio">Aún no hay premios. Créelos con el formulario de arriba.</td></tr>';
+        return;
+      }
+
+      $('tabla-premios').innerHTML = estado.premios.map((pr) => {
+        const g = estado.ganadores.find((x) => x.premio_id === pr.id);
+        const ganador = g ? estado.participantes.find((p) => p.numero === g.numero) : null;
+        const para = [
+          pr.tipo_personal || 'Todos',
+          pr.rango_antiguedad ? nombreRango(pr.rango_antiguedad) : 'Toda antigüedad'
+        ].join(' · ');
+        return `<tr>
+          <td class="num">${pr.orden}</td>
+          <td>
+            <strong>${esc(pr.nombre)}</strong>
+            ${pr.descripcion ? `<div class="sub">${esc(pr.descripcion)}</div>` : ''}
+          </td>
+          <td>${esc(para)}</td>
+          <td class="num">${g ? '—' : elegibles(pr)}</td>
+          <td>
+            ${ganador
+              ? `<span class="chip gano">N.º ${ganador.numero}</span>
+                 <div class="sub">${esc(ganador.nombres)} ${esc(ganador.apellidos)}</div>`
+              : '<span class="chip no">Sin sortear</span>'}
+          </td>
+          <td>
+            <div class="acciones">
+              <button type="button" class="mini secundario" data-editar="${pr.id}">Editar</button>
+              <button type="button" class="mini peligro" data-eliminar="${pr.id}">Eliminar</button>
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    $('form-premio').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = $('premio-id').value;
+      const datos = {
+        nombre: $('premio-nombre').value.trim(),
+        descripcion: $('premio-descripcion').value.trim() || null,
+        orden: parseInt($('premio-orden').value, 10) || 0,
+        tipo_personal: $('premio-tipo').value || null,
+        rango_antiguedad: $('premio-rango').value ? Number($('premio-rango').value) : null
+      };
+      if (!datos.nombre) { aviso('Escriba el nombre del premio.', true); return; }
+
+      const boton = $('guardar-premio');
+      boton.disabled = true;
+      const { error } = id
+        ? await db.from('premios').update(datos).eq('id', Number(id))
+        : await db.from('premios').insert(datos);
+      boton.disabled = false;
+
+      if (error) { aviso('No se pudo guardar el premio: ' + error.message, true); return; }
+      aviso(id ? 'Premio actualizado.' : 'Premio creado.');
+      $('premio-id').value = '';
+      await cargarDatos();
+      limpiarFormPremio();
+    });
+
+    $('cancelar-premio').addEventListener('click', limpiarFormPremio);
+
+    $('tabla-premios').addEventListener('click', async (e) => {
+      const editar = e.target.closest('button[data-editar]');
+      const eliminar = e.target.closest('button[data-eliminar]');
+
+      if (editar) {
+        const pr = estado.premios.find((x) => x.id === Number(editar.dataset.editar));
+        if (!pr) return;
+        $('premio-id').value = pr.id;
+        $('premio-nombre').value = pr.nombre;
+        $('premio-descripcion').value = pr.descripcion || '';
+        $('premio-orden').value = pr.orden;
+        $('premio-tipo').value = pr.tipo_personal || '';
+        $('premio-rango').value = pr.rango_antiguedad || '';
+        $('titulo-form-premio').textContent = 'Editar premio';
+        mostrar('cancelar-premio', true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        $('premio-nombre').focus();
+        return;
+      }
+
+      if (eliminar) {
+        const pr = estado.premios.find((x) => x.id === Number(eliminar.dataset.eliminar));
+        if (!pr) return;
+        const tieneGanador = estado.ganadores.some((g) => g.premio_id === pr.id);
+        const pregunta = tieneGanador
+          ? `"${pr.nombre}" ya tiene ganador. Si lo elimina también se borra el ganador. ¿Continuar?`
+          : `¿Eliminar el premio "${pr.nombre}"?`;
+        if (!confirm(pregunta)) return;
+
+        eliminar.disabled = true;
+        const { error } = await db.from('premios').delete().eq('id', pr.id);
+        if (error) {
+          eliminar.disabled = false;
+          aviso('No se pudo eliminar: ' + error.message, true);
+          return;
+        }
+        if ($('premio-id').value === String(pr.id)) limpiarFormPremio();
+        aviso('Premio eliminado.');
+        cargarDatos();
+      }
+    });
+
+    // ---------------------------------------------------------------
+    // Usuarios
+    // ---------------------------------------------------------------
+    function pintarUsuarios() {
+      if (!estado.usuarios.length) {
+        $('tabla-usuarios').innerHTML = '<tr><td colspan="5" class="vacio">No hay usuarios.</td></tr>';
+        return;
+      }
+
+      $('tabla-usuarios').innerHTML = estado.usuarios.map((u) => {
+        const yo = u.user_id === estado.miId;
+        return `<tr data-uid="${u.user_id}">
+          <td>${esc(u.email)}${yo ? ' <span class="chip si">usted</span>' : ''}</td>
+          <td><input type="text" value="${esc(u.nombre || '')}" placeholder="Nombre" aria-label="Nombre"></td>
+          <td>
+            <select aria-label="Rol" ${yo ? 'disabled' : ''}>
+              <option value="" ${!u.rol ? 'selected' : ''}>Sin acceso</option>
+              <option value="ingreso" ${u.rol === 'ingreso' ? 'selected' : ''}>Ingreso</option>
+              <option value="admin" ${u.rol === 'admin' ? 'selected' : ''}>Administrador</option>
+            </select>
+          </td>
+          <td>${u.ultimo_ingreso ? fechaHora(u.ultimo_ingreso) : '<span class="sub">Nunca</span>'}</td>
+          <td><button type="button" class="mini" data-guardar-usuario>Guardar</button></td>
+        </tr>`;
+      }).join('');
+    }
+
+    $('tabla-usuarios').addEventListener('click', async (e) => {
+      const boton = e.target.closest('button[data-guardar-usuario]');
+      if (!boton) return;
+      const fila = boton.closest('tr');
+      const uid = fila.dataset.uid;
+      const u = estado.usuarios.find((x) => x.user_id === uid);
+      const rol = fila.querySelector('select').value;
+      const nombre = fila.querySelector('input').value.trim() || null;
+
+      let respuesta;
+      if (!rol) {
+        if (!u.rol) { aviso('Ese usuario ya está sin acceso.'); return; }
+        if (!confirm(`¿Quitar el acceso a ${u.email}?`)) return;
+        boton.disabled = true;
+        respuesta = await db.rpc('quitar_acceso', { p_user_id: uid });
+      } else {
+        boton.disabled = true;
+        respuesta = await db.rpc('asignar_rol', { p_user_id: uid, p_rol: rol, p_nombre: nombre });
+      }
+      boton.disabled = false;
+
+      if (respuesta.error) { aviso(respuesta.error.message, true); return; }
+      aviso('Usuario actualizado.');
+      cargarDatos();
+    });
+
+    verificarSesion();
+  </script>
+</body>
+</html>
