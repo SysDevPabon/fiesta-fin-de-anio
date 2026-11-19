@@ -4,6 +4,7 @@
      Ruta en el repositorio: ingreso.html
      Uso: personal con rol "admin" o "ingreso", desde el celular
      La cámara solo funciona con HTTPS (GitHub Pages) o localhost
+     Imágenes: img/logo-clinica.png, img/logo-centro.png, img/avatar.png
      ===================================================================== -->
 <html lang="es">
 <head>
@@ -12,23 +13,27 @@
   <title>Ingreso - Fiesta fin de año 2026</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --fondo: #0f1d33;
-      --fondo-2: #16294a;
+      /* Colores institucionales */
+      --azul: #195BA7;
+      --azul-oscuro: #0F3F7A;
+      --rojo: #E51C21;
+      --rojo-oscuro: #B8141A;
+      --celeste: #6ECAF0;
+
+      --fondo: #EEF4FB;
       --tarjeta: #ffffff;
-      --texto: #1b2433;
-      --texto-suave: #5b6576;
-      --borde: #d9dee7;
-      --dorado: #d9a441;
-      --verde: #1e7a46;
-      --verde-fondo: #e6f4ec;
-      --ambar: #8a5a00;
-      --ambar-fondo: #fff4dc;
-      --rojo: #b3261e;
-      --rojo-fondo: #fdecea;
-      --radio: 16px;
+      --texto: #1B2433;
+      --texto-suave: #5B6576;
+      --borde: #D8E0EA;
+      --verde: #1E7A46;
+      --verde-fondo: #E6F4EC;
+      --ambar: #8A5A00;
+      --ambar-fondo: #FFF4DC;
+      --error-fondo: #FDECEC;
+      --radio: 18px;
     }
 
     * { box-sizing: border-box; }
@@ -38,50 +43,97 @@
       min-height: 100vh;
       font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
       color: var(--texto);
-      background: linear-gradient(160deg, var(--fondo) 0%, var(--fondo-2) 100%);
-      padding: 20px 16px 32px;
+      background: linear-gradient(180deg, #F7FAFE 0%, var(--fondo) 100%);
+      background-attachment: fixed;
     }
 
-    .contenedor { width: 100%; max-width: 480px; margin: 0 auto; }
+    /* ---------- Franja de logos ---------- */
+    .logos {
+      background: #fff;
+      border-bottom: 4px solid var(--azul);
+      box-shadow: 0 4px 18px rgba(15,63,122,.08);
+    }
+    .logos-interna {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .logos img { display: block; height: 40px; width: auto; max-width: 48%; object-fit: contain; }
+    .logos img.centro { height: 34px; }
 
+    .contenedor { width: 100%; max-width: 480px; margin: 0 auto; padding: 16px 16px 32px; }
+
+    /* ---------- Encabezado ---------- */
     .barra {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      color: #fff;
       margin-bottom: 16px;
       gap: 12px;
     }
-    .barra h1 { font-size: 18px; margin: 0; }
+    .barra .titulo { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .avatar {
+      flex-shrink: 0;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      overflow: hidden;
+      background: #F5F5F5;
+      border: 3px solid #fff;
+      box-shadow: 0 0 0 2px var(--azul), 0 6px 14px rgba(15,63,122,.16);
+    }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%; }
+    .barra h1 {
+      font-family: 'Poppins', 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 19px;
+      line-height: 1.15;
+      margin: 0;
+      color: var(--azul-oscuro);
+    }
     a.enlace-menu {
       display: inline-block;
-      color: #c9d2e3;
+      color: var(--azul);
       font-size: 12px;
       font-weight: 600;
       text-decoration: none;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
-    a.enlace-menu:hover { color: #fff; }
-    .barra .usuario { font-size: 12px; color: #c9d2e3; text-align: right; }
+    a.enlace-menu:hover { color: var(--azul-oscuro); }
+    .barra .usuario { font-size: 12px; color: var(--texto-suave); text-align: right; min-width: 0; }
+    #correo-usuario { max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-left: auto; }
     .barra .usuario button {
       width: auto;
       margin-top: 4px;
-      padding: 4px 10px;
+      padding: 5px 10px;
       font-size: 12px;
-      background: transparent;
-      color: var(--dorado);
-      border: 1px solid rgba(217,164,65,.5);
+      background: #fff;
+      color: var(--azul);
+      border: 1.5px solid var(--borde);
     }
 
+    /* ---------- Tarjetas ---------- */
     .tarjeta {
       background: var(--tarjeta);
       border-radius: var(--radio);
       padding: 22px 20px;
-      box-shadow: 0 20px 50px rgba(0,0,0,.35);
+      box-shadow: 0 14px 36px rgba(15,63,122,.12);
+      border-top: 5px solid var(--azul);
       margin-bottom: 16px;
     }
+    #vista-login { border-top-color: var(--rojo); }
 
-    h2 { font-size: 17px; margin: 0 0 14px; }
+    h2 {
+      font-family: 'Poppins', 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 17px;
+      margin: 0 0 14px;
+      color: var(--azul-oscuro);
+    }
 
     label.campo { display: block; font-weight: 600; font-size: 14px; margin-bottom: 6px; }
     input[type="email"], input[type="password"], input[type="text"] {
@@ -90,11 +142,12 @@
       font-size: 17px;
       padding: 12px 14px;
       border: 1.5px solid var(--borde);
-      border-radius: 10px;
+      border-radius: 12px;
       margin-bottom: 14px;
       outline: none;
+      transition: border-color .15s, box-shadow .15s;
     }
-    input:focus { border-color: var(--dorado); }
+    input:focus { border-color: var(--azul); box-shadow: 0 0 0 4px rgba(110,202,240,.35); }
 
     button {
       width: 100%;
@@ -103,14 +156,17 @@
       font-size: 16px;
       padding: 14px;
       border: none;
-      border-radius: 10px;
-      background: var(--dorado);
-      color: #1b1406;
+      border-radius: 12px;
+      background: var(--azul);
+      color: #fff;
       cursor: pointer;
     }
+    button:hover { background: var(--azul-oscuro); }
     button:disabled { opacity: .6; cursor: wait; }
-    button.secundario { background: transparent; color: var(--texto-suave); border: 1.5px solid var(--borde); }
+    button.secundario { background: #fff; color: var(--texto-suave); border: 1.5px solid var(--borde); }
+    button.secundario:hover { background: #F3F6FA; }
     button.verde { background: var(--verde); color: #fff; }
+    button.verde:hover { background: #17633A; }
 
     .fila { display: flex; gap: 10px; }
     .fila > * { flex: 1; }
@@ -120,22 +176,22 @@
     .mensaje {
       margin-top: 12px;
       padding: 12px 14px;
-      border-radius: 10px;
+      border-radius: 12px;
       font-size: 14px;
-      background: var(--rojo-fondo);
-      color: var(--rojo);
+      background: var(--error-fondo);
+      color: var(--rojo-oscuro);
     }
 
     #lector {
       width: 100%;
-      border-radius: 12px;
+      border-radius: 14px;
       overflow: hidden;
-      background: #000;
+      background: #0F3F7A;
       min-height: 240px;
     }
     .nota { font-size: 13px; color: var(--texto-suave); margin: 10px 0 0; text-align: center; }
 
-    /* Resultado del escaneo */
+    /* ---------- Resultado del escaneo ---------- */
     .resultado { text-align: center; }
     .resultado .estado {
       display: inline-block;
@@ -145,28 +201,46 @@
       border-radius: 999px;
       margin-bottom: 12px;
     }
-    .estado.pendiente { background: #eef1f6; color: var(--texto-suave); }
+    .estado.pendiente { background: rgba(110,202,240,.22); color: var(--azul-oscuro); }
     .estado.ok { background: var(--verde-fondo); color: var(--verde); }
     .estado.repetido { background: var(--ambar-fondo); color: var(--ambar); }
     .resultado .numero {
-      font-family: 'Fraunces', Georgia, serif;
+      font-family: 'Poppins', 'Inter', sans-serif;
       font-weight: 800;
       font-size: 64px;
       line-height: 1;
       margin: 4px 0 8px;
+      color: var(--rojo);
     }
-    .resultado .nombre { font-size: 20px; font-weight: 600; margin: 0 0 4px; }
+    .resultado .nombre {
+      font-family: 'Poppins', 'Inter', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0 0 4px;
+      color: var(--azul-oscuro);
+    }
     .resultado .detalle { font-size: 14px; color: var(--texto-suave); margin: 0 0 18px; }
 
-    .contador { text-align: center; color: #c9d2e3; font-size: 13px; }
+    .contador { text-align: center; color: var(--texto-suave); font-size: 13px; }
+    .contador strong { color: var(--azul); }
   </style>
 </head>
 <body>
+  <div class="logos">
+    <div class="logos-interna">
+      <img src="img/logo-clinica.png" alt="Clínica Pabón">
+      <img src="img/logo-centro.png" alt="Centro de Cuidados Cardioneurovasculares Pabón S.A.S." class="centro">
+    </div>
+  </div>
+
   <main class="contenedor">
     <div class="barra">
-      <div>
-        <a class="enlace-menu" href="menu.html">← Menú</a>
-        <h1>Ingreso al evento</h1>
+      <div class="titulo">
+        <div class="avatar"><img src="img/avatar.png" alt=""></div>
+        <div>
+          <a class="enlace-menu" href="menu.html">← Menú</a>
+          <h1>Ingreso al evento</h1>
+        </div>
       </div>
       <div class="usuario oculto" id="zona-usuario">
         <div id="correo-usuario"></div>

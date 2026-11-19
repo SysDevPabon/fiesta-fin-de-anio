@@ -8,6 +8,7 @@
      El ganador lo elige la base de datos (sortear_nuevo); la animación
      solo muestra el resultado.
      Teclas: Espacio = sortear / pasar al siguiente sorteo
+     Imágenes: img/logo-clinica.png, img/logo-centro.png, img/avatar.png
      ===================================================================== -->
 <html lang="es">
 <head>
@@ -16,17 +17,22 @@
   <title>Sorteo - Fiesta fin de año 2026</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --fondo: #0b1628;
-      --fondo-2: #16294a;
+      /* Colores institucionales */
+      --azul: #195BA7;
+      --azul-oscuro: #0F3F7A;
+      --rojo: #E51C21;
+      --rojo-oscuro: #B8141A;
+      --fondo: #082A57;
+      --fondo-2: #195BA7;
       --panel: rgba(255,255,255,.06);
       --borde: rgba(255,255,255,.14);
       --texto: #ffffff;
       --texto-suave: #b9c4d8;
-      --dorado: #d9a441;
-      --dorado-claro: #f1c96b;
+      --celeste: #6ECAF0;
+      --celeste-claro: #BDE8FA;
       --verde: #5fd08f;
       --radio: 18px;
     }
@@ -39,8 +45,8 @@
       font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
       color: var(--texto);
       background:
-        radial-gradient(circle at 50% 35%, rgba(217,164,65,.22) 0, transparent 45%),
-        radial-gradient(circle at 10% 100%, rgba(217,164,65,.10) 0, transparent 40%),
+        radial-gradient(circle at 50% 35%, rgba(110,202,240,.22) 0, transparent 45%),
+        radial-gradient(circle at 10% 100%, rgba(110,202,240,.10) 0, transparent 40%),
         linear-gradient(160deg, var(--fondo) 0%, var(--fondo-2) 100%);
       background-attachment: fixed;
       min-height: 100vh;
@@ -54,9 +60,10 @@
       cursor: pointer;
       padding: 10px 16px;
       font-size: 14px;
-      background: var(--dorado);
-      color: #1b1406;
+      background: var(--rojo);
+      color: #fff;
     }
+    button:hover:not(:disabled):not(.borde) { background: var(--rojo-oscuro); }
     button:disabled { opacity: .45; cursor: not-allowed; }
     button.borde { background: transparent; color: var(--texto-suave); border: 1px solid var(--borde); }
     button.borde:hover:not(:disabled) { color: #fff; border-color: rgba(255,255,255,.35); }
@@ -81,20 +88,33 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 12px 20px;
       flex-wrap: wrap;
-      padding: 18px clamp(16px, 3vw, 40px);
+      padding: 10px clamp(16px, 3vw, 40px);
+      margin-bottom: 18px;
+      background: #fff;
+      border-bottom: 5px solid var(--rojo);
+      box-shadow: 0 6px 24px rgba(0,0,0,.18);
+      color: var(--azul-oscuro);
     }
+    .marca { display: flex; align-items: center; gap: clamp(14px, 2vw, 28px); min-width: 0; }
+    .marca .logo { display: block; height: clamp(38px, 4vw, 54px); width: auto; }
+    .marca .logo.centro { height: clamp(32px, 3.4vw, 46px); }
+    .marca .titulo-evento { padding-left: clamp(14px, 2vw, 28px); border-left: 2px solid #D8E0EA; }
     .marca small {
       display: block;
-      color: var(--dorado);
+      color: var(--rojo);
       font-size: 12px;
+      font-weight: 600;
       letter-spacing: .16em;
       text-transform: uppercase;
     }
-    .marca strong { font-family: 'Fraunces', Georgia, serif; font-weight: 800; font-size: clamp(20px, 2.2vw, 28px); }
+    .marca strong { font-family: 'Poppins', 'Inter', sans-serif; font-weight: 800; font-size: clamp(18px, 1.9vw, 26px); color: var(--azul-oscuro); }
+    @media (max-width: 760px) { .marca .titulo-evento { display: none; } }
     .controles { display: flex; gap: 8px; flex-wrap: wrap; }
     .controles button { padding: 8px 12px; font-size: 13px; }
+    header .borde { color: var(--azul) !important; border-color: #D8E0EA !important; background: #fff !important; }
+    header .borde:hover { border-color: var(--azul) !important; }
 
     /* ---------- Distribución ---------- */
     .escenario-grid {
@@ -102,7 +122,7 @@
       grid-template-columns: minmax(0, 1fr) 340px;
       gap: clamp(16px, 2vw, 28px);
       padding: 0 clamp(16px, 3vw, 40px) 32px;
-      min-height: calc(100vh - 90px);
+      min-height: calc(100vh - 110px);
     }
     @media (max-width: 900px) {
       .escenario-grid { grid-template-columns: 1fr; }
@@ -121,11 +141,11 @@
       font-size: clamp(13px, 1.2vw, 16px);
       letter-spacing: .18em;
       text-transform: uppercase;
-      color: var(--dorado);
+      color: var(--celeste);
       margin-bottom: 10px;
     }
     .premio-nombre {
-      font-family: 'Fraunces', Georgia, serif;
+      font-family: 'Poppins', 'Inter', sans-serif;
       font-weight: 800;
       font-size: clamp(30px, 4.4vw, 64px);
       line-height: 1.08;
@@ -137,8 +157,8 @@
       margin-top: 6px;
       padding: 6px 14px;
       border-radius: 999px;
-      border: 1px solid rgba(217,164,65,.45);
-      color: var(--dorado-claro);
+      border: 1px solid rgba(110,202,240,.45);
+      color: var(--celeste-claro);
       font-size: clamp(13px, 1.2vw, 16px);
       max-width: 90%;
     }
@@ -165,21 +185,21 @@
       font-weight: 500;
     }
     .chips button[aria-pressed="true"] {
-      background: rgba(217,164,65,.18);
-      border-color: var(--dorado);
+      background: rgba(110,202,240,.18);
+      border-color: var(--celeste);
       color: #fff;
       font-weight: 600;
     }
-    .chips button[aria-pressed="true"]::before { content: '✓ '; color: var(--dorado-claro); }
+    .chips button[aria-pressed="true"]::before { content: '✓ '; color: var(--celeste-claro); }
 
     .numero-caja {
       margin: clamp(16px, 2.5vw, 30px) 0 clamp(12px, 1.8vw, 20px);
       min-width: min(520px, 90%);
       padding: clamp(8px, 1.3vw, 16px) clamp(24px, 4vw, 60px);
       border-radius: 28px;
-      border: 2px solid rgba(217,164,65,.55);
+      border: 2px solid rgba(110,202,240,.55);
       background: rgba(0,0,0,.18);
-      box-shadow: 0 0 80px rgba(217,164,65,.15) inset;
+      box-shadow: 0 0 80px rgba(110,202,240,.15) inset;
     }
     .numero-caja span {
       display: block;
@@ -190,16 +210,16 @@
     }
     #numero {
       display: block;
-      font-family: 'Fraunces', Georgia, serif;
+      font-family: 'Poppins', 'Inter', sans-serif;
       font-weight: 800;
       font-size: clamp(100px, 15vw, 240px);
       line-height: 1;
-      color: var(--dorado-claro);
+      color: #fff;
       font-variant-numeric: tabular-nums;
-      text-shadow: 0 6px 40px rgba(217,164,65,.35);
+      text-shadow: 0 6px 40px rgba(110,202,240,.35);
     }
     .modo-nuevo #numero { font-size: clamp(80px, 10vw, 160px); }
-    .girando #numero { color: #fff; }
+    .girando #numero { color: var(--celeste-claro); }
     .revelado #numero { animation: latido .6s ease-out; }
     @keyframes latido {
       0% { transform: scale(.85); }
@@ -217,12 +237,25 @@
       margin-bottom: 6px;
     }
     .ganador .nombre {
-      font-family: 'Fraunces', Georgia, serif;
+      font-family: 'Poppins', 'Inter', sans-serif;
       font-weight: 700;
       font-size: clamp(26px, 3.4vw, 50px);
       line-height: 1.1;
     }
     .ganador .cargo { color: var(--texto-suave); font-size: clamp(14px, 1.3vw, 19px); margin-top: 6px; }
+    .ganador-fila { display: flex; align-items: center; justify-content: center; gap: clamp(14px, 2vw, 26px); text-align: left; }
+    .avatar-ganador {
+      flex-shrink: 0;
+      width: clamp(76px, 7vw, 116px);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      overflow: hidden;
+      background: #F5F5F5;
+      border: 4px solid #fff;
+      box-shadow: 0 0 0 4px var(--rojo), 0 12px 30px rgba(0,0,0,.35);
+    }
+    .avatar-ganador img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%; }
+    .revelado .avatar-ganador { animation: latido .7s ease-out; }
     .ganador .estado-juego { color: var(--texto-suave); font-size: clamp(15px, 1.5vw, 21px); }
     .ganador .estado-juego strong { color: #fff; }
 
@@ -231,7 +264,7 @@
       font-size: clamp(18px, 1.8vw, 24px);
       padding: 16px 48px;
       border-radius: 999px;
-      box-shadow: 0 10px 40px rgba(217,164,65,.35);
+      box-shadow: 0 10px 40px rgba(229,28,33,.45);
     }
 
     .anular-caja {
@@ -275,8 +308,8 @@
       gap: 2px 8px;
     }
     #lista-sorteos button:hover:not(:disabled) { border-color: rgba(255,255,255,.35); }
-    #lista-sorteos button.activo { border-color: var(--dorado); background: rgba(217,164,65,.12); }
-    #lista-sorteos .orden { color: var(--dorado); font-weight: 700; grid-row: span 3; }
+    #lista-sorteos button.activo { border-color: var(--celeste); background: rgba(110,202,240,.12); }
+    #lista-sorteos .orden { color: var(--celeste); font-weight: 700; grid-row: span 3; }
     #lista-sorteos .nombre-sorteo { font-weight: 600; font-size: 14px; }
     #lista-sorteos .para { font-size: 12px; color: var(--texto-suave); }
     #lista-sorteos .info { font-size: 12.5px; color: var(--texto-suave); }
@@ -305,7 +338,7 @@
       margin-bottom: 14px;
       outline: none;
     }
-    .login input:focus { border-color: var(--dorado); }
+    .login input:focus { border-color: var(--celeste); }
     .login button { width: 100%; padding: 13px; font-size: 16px; }
     .mensaje { margin-top: 12px; padding: 12px 14px; border-radius: 10px; font-size: 14px; background: #fdecea; color: #b3261e; }
 
@@ -331,8 +364,12 @@
 <body>
   <header>
     <div class="marca">
-      <small>Sorteo de premios</small>
-      <strong id="titulo-evento">Fiesta fin de año 2026</strong>
+      <img src="img/logo-clinica.png" alt="Clínica Pabón" class="logo">
+      <img src="img/logo-centro.png" alt="Centro de Cuidados Cardioneurovasculares Pabón S.A.S." class="logo centro">
+      <div class="titulo-evento">
+        <small>Sorteo de premios</small>
+        <strong id="titulo-evento">Fiesta fin de año 2026</strong>
+      </div>
     </div>
     <div class="controles">
       <a class="borde" href="menu.html">← Menú</a>
@@ -717,9 +754,14 @@
 
     function pintarGanador(g) {
       $('ganador').innerHTML = `
-        <div class="titulo">¡Felicitaciones!</div>
-        <div class="nombre">${esc(g.nombres)} ${esc(g.apellidos)}</div>
-        <div class="cargo">${esc([g.cargo, g.empresa].filter(Boolean).join(' · '))}</div>`;
+        <div class="ganador-fila">
+          <div class="avatar-ganador"><img src="img/avatar.png" alt=""></div>
+          <div>
+            <div class="titulo">¡Felicitaciones!</div>
+            <div class="nombre">${esc(g.nombres)} ${esc(g.apellidos)}</div>
+            <div class="cargo">${esc([g.cargo, g.empresa].filter(Boolean).join(' · '))}</div>
+          </div>
+        </div>`;
     }
 
     // ---------------------------------------------------------------
@@ -937,7 +979,7 @@
       lienzo.height = innerHeight * escala;
       ctx.scale(escala, escala);
 
-      const colores = ['#d9a441', '#f1c96b', '#ffffff', '#5fd08f', '#7fb2ff', '#ff8a80'];
+      const colores = ['#E51C21', '#195BA7', '#6ECAF0', '#ffffff', '#BBBCBF', '#FF6B6F'];
       const piezas = Array.from({ length: 180 }, () => ({
         x: innerWidth / 2 + (Math.random() - .5) * 200,
         y: innerHeight * .45,
