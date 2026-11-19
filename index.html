@@ -3,6 +3,7 @@
      Fiesta fin de año 2026 - Página de registro de colaboradores
      Ruta en el repositorio: index.html
      Muestra el número del sorteo y el código QR para el ingreso al evento
+     Imágenes: img/logo-clinica.png, img/logo-centro.png, img/avatar.png
      ===================================================================== -->
 <html lang="es">
 <head>
@@ -11,21 +12,25 @@
   <title>Registro - Fiesta fin de año 2026</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --fondo: #0f1d33;
-      --fondo-2: #16294a;
+      /* Colores institucionales */
+      --azul: #195BA7;
+      --azul-oscuro: #0F3F7A;
+      --rojo: #E51C21;
+      --rojo-oscuro: #B8141A;
+      --celeste: #6ECAF0;
+      --gris: #BBBCBF;
+
+      --fondo: #EEF4FB;
       --tarjeta: #ffffff;
-      --texto: #1b2433;
-      --texto-suave: #5b6576;
-      --borde: #d9dee7;
-      --dorado: #d9a441;
-      --dorado-oscuro: #a8761c;
-      --rojo: #b3261e;
-      --rojo-fondo: #fdecea;
-      --verde: #1e7a46;
-      --radio: 16px;
+      --texto: #1B2433;
+      --texto-suave: #5B6576;
+      --borde: #D8E0EA;
+      --error-fondo: #FDECEC;
+      --verde: #1E7A46;
+      --radio: 18px;
     }
 
     * { box-sizing: border-box; }
@@ -35,62 +40,108 @@
       min-height: 100vh;
       font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
       color: var(--texto);
-      background:
-        radial-gradient(circle at 15% 10%, rgba(217,164,65,.18) 0, transparent 35%),
-        radial-gradient(circle at 85% 90%, rgba(217,164,65,.12) 0, transparent 40%),
-        linear-gradient(160deg, var(--fondo) 0%, var(--fondo-2) 100%);
+      background: linear-gradient(180deg, #F7FAFE 0%, var(--fondo) 100%);
+      background-attachment: fixed;
+    }
+
+    /* ---------- Franja de logos ---------- */
+    .logos {
+      background: #fff;
+      border-bottom: 4px solid var(--azul);
+      box-shadow: 0 4px 18px rgba(15,63,122,.08);
+    }
+    .logos-interna {
+      max-width: 460px;
+      margin: 0 auto;
+      padding: 12px 16px;
       display: flex;
       align-items: center;
-      justify-content: center;
-      padding: 32px 16px;
+      justify-content: space-between;
+      gap: 16px;
     }
+    .logos img { display: block; height: 44px; width: auto; max-width: 48%; object-fit: contain; }
+    .logos img.centro { height: 38px; }
 
-    .contenedor { width: 100%; max-width: 440px; }
+    .contenedor { width: 100%; max-width: 460px; margin: 0 auto; padding: 22px 16px 32px; }
 
-    .encabezado { text-align: center; color: #fff; margin-bottom: 24px; }
-    .encabezado .etiqueta {
-      display: inline-block;
-      font-size: 12px;
-      letter-spacing: .14em;
-      text-transform: uppercase;
-      color: var(--dorado);
-      border: 1px solid rgba(217,164,65,.5);
-      border-radius: 999px;
-      padding: 4px 12px;
+    /* ---------- Bienvenida con avatar ---------- */
+    .bienvenida {
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .avatar {
+      position: relative;
+      flex-shrink: 0;
+      width: 104px;
+      height: 104px;
+      border-radius: 50%;
+      overflow: hidden;
+      background: #F5F5F5;
+      border: 4px solid #fff;
+      box-shadow: 0 0 0 3px var(--azul), 0 10px 24px rgba(15,63,122,.18);
+    }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%; }
+    .globo {
+      position: relative;
+      background: #fff;
+      border-radius: 18px 18px 18px 4px;
+      padding: 12px 14px;
+      box-shadow: 0 8px 22px rgba(15,63,122,.10);
+      font-size: 14.5px;
+      line-height: 1.45;
+      color: var(--texto);
       margin-bottom: 14px;
     }
-    .encabezado h1 {
-      font-family: 'Fraunces', Georgia, serif;
-      font-weight: 800;
-      font-size: clamp(30px, 8vw, 40px);
-      line-height: 1.1;
-      margin: 0 0 8px;
-    }
-    .encabezado p { margin: 0; color: #c9d2e3; font-size: 15px; }
+    .globo strong { color: var(--azul); }
 
+    .titulo { text-align: center; margin-bottom: 20px; }
+    .titulo h1 {
+      font-family: 'Poppins', 'Inter', sans-serif;
+      font-weight: 800;
+      font-size: clamp(30px, 8.5vw, 40px);
+      line-height: 1.08;
+      margin: 0 0 10px;
+      color: var(--azul-oscuro);
+      letter-spacing: -.01em;
+    }
+    .titulo h1 span { color: var(--rojo); }
+    .fecha-chip {
+      display: inline-block;
+      background: var(--rojo);
+      color: #fff;
+      font-weight: 600;
+      font-size: 14px;
+      padding: 6px 14px;
+      border-radius: 999px;
+    }
+
+    /* ---------- Tarjeta ---------- */
     .tarjeta {
       background: var(--tarjeta);
       border-radius: var(--radio);
-      padding: 28px 24px;
-      box-shadow: 0 20px 50px rgba(0,0,0,.35);
+      padding: 26px 22px;
+      box-shadow: 0 18px 44px rgba(15,63,122,.14);
+      border-top: 5px solid var(--rojo);
     }
 
-    h2 { font-size: 18px; margin: 0 0 4px; }
-    .ayuda { color: var(--texto-suave); font-size: 14px; margin: 0 0 20px; }
+    h2 { font-family: 'Poppins', 'Inter', sans-serif; font-size: 18px; font-weight: 700; margin: 0 0 4px; color: var(--azul-oscuro); }
+    .ayuda { color: var(--texto-suave); font-size: 14px; margin: 0 0 20px; line-height: 1.5; }
 
     label.campo { display: block; font-weight: 600; font-size: 14px; margin-bottom: 6px; }
     input[type="text"] {
       width: 100%;
       font: inherit;
-      font-size: 17px;
-      padding: 12px 14px;
+      font-size: 18px;
+      padding: 13px 14px;
       border: 1.5px solid var(--borde);
-      border-radius: 10px;
+      border-radius: 12px;
       margin-bottom: 18px;
       outline: none;
-      transition: border-color .15s;
+      transition: border-color .15s, box-shadow .15s;
     }
-    input[type="text"]:focus { border-color: var(--dorado); }
+    input[type="text"]:focus { border-color: var(--azul); box-shadow: 0 0 0 4px rgba(110,202,240,.35); }
 
     .autorizacion {
       display: flex;
@@ -101,10 +152,10 @@
       line-height: 1.45;
       margin-bottom: 8px;
     }
-    .autorizacion input { width: 20px; height: 20px; margin-top: 1px; flex-shrink: 0; accent-color: var(--dorado-oscuro); }
+    .autorizacion input { width: 20px; height: 20px; margin-top: 1px; flex-shrink: 0; accent-color: var(--azul); }
 
     details { font-size: 12.5px; color: var(--texto-suave); margin: 0 0 20px 30px; }
-    details summary { cursor: pointer; color: var(--dorado-oscuro); font-weight: 600; }
+    details summary { cursor: pointer; color: var(--azul); font-weight: 600; }
     details p { line-height: 1.5; margin: 8px 0 0; }
 
     button {
@@ -114,88 +165,104 @@
       font-size: 16px;
       padding: 14px;
       border: none;
-      border-radius: 10px;
-      background: var(--dorado);
-      color: #1b1406;
+      border-radius: 12px;
+      background: var(--azul);
+      color: #fff;
       cursor: pointer;
       transition: background .15s;
     }
-    button:hover { background: #e4b456; }
+    button:hover { background: var(--azul-oscuro); }
     button:disabled { opacity: .6; cursor: wait; }
+    button.rojo { background: var(--rojo); }
+    button.rojo:hover { background: var(--rojo-oscuro); }
     button.secundario {
       background: transparent;
       color: var(--texto-suave);
       border: 1.5px solid var(--borde);
       margin-top: 10px;
     }
-    button.secundario:hover { background: #f4f6f9; }
+    button.secundario:hover { background: #F3F6FA; }
 
     .mensaje {
       display: none;
       margin-top: 16px;
       padding: 12px 14px;
-      border-radius: 10px;
+      border-radius: 12px;
       font-size: 14px;
-      background: var(--rojo-fondo);
-      color: var(--rojo);
+      background: var(--error-fondo);
+      color: var(--rojo-oscuro);
     }
     .mensaje.visible { display: block; }
 
-    /* Resultado: boleta con el número y el QR */
+    /* ---------- Boleta con número y QR ---------- */
     .boleta { text-align: center; display: none; }
     .boleta.visible { display: block; }
-    .boleta .saludo { font-size: 18px; font-weight: 600; margin: 0 0 4px; }
-    .boleta .estado { color: var(--verde); font-size: 14px; margin: 0 0 20px; }
+    .boleta .saludo { font-family: 'Poppins', 'Inter', sans-serif; font-size: 20px; font-weight: 700; margin: 0 0 4px; color: var(--azul-oscuro); }
+    .boleta .estado { color: var(--verde); font-size: 14px; margin: 0 0 18px; }
     .numero-caja {
-      border: 2px dashed var(--dorado);
+      border: 2px dashed var(--celeste);
       border-radius: var(--radio);
-      padding: 18px 12px 20px;
-      margin-bottom: 20px;
-      background: #fffaf0;
+      padding: 16px 12px 20px;
+      margin-bottom: 18px;
+      background: linear-gradient(180deg, #F3FAFE 0%, #fff 70%);
     }
     .numero-caja span {
       display: block;
       font-size: 12px;
       letter-spacing: .14em;
       text-transform: uppercase;
-      color: var(--dorado-oscuro);
+      color: var(--azul);
+      font-weight: 600;
     }
     .numero-caja strong {
       display: block;
-      font-family: 'Fraunces', Georgia, serif;
+      font-family: 'Poppins', 'Inter', sans-serif;
       font-weight: 800;
-      font-size: 64px;
-      line-height: 1.05;
-      color: var(--texto);
-      margin-bottom: 14px;
+      font-size: 68px;
+      line-height: 1.1;
+      color: var(--rojo);
+      margin-bottom: 12px;
     }
     #qr {
       display: inline-block;
       background: #fff;
       padding: 10px;
-      border-radius: 10px;
+      border-radius: 12px;
       border: 1px solid var(--borde);
     }
     #qr img, #qr canvas { display: block; width: 200px; height: 200px; }
-    .numero-caja .qr-texto { margin-top: 10px; font-size: 13px; letter-spacing: 0; text-transform: none; color: var(--texto-suave); }
-    .boleta .indicaciones { font-size: 14px; color: var(--texto-suave); line-height: 1.5; margin: 0 0 20px; }
+    .numero-caja .qr-texto { margin-top: 10px; font-size: 13px; letter-spacing: 0; text-transform: none; color: var(--texto-suave); font-weight: 500; }
+    .boleta .indicaciones { font-size: 14px; color: var(--texto-suave); line-height: 1.5; margin: 0 0 18px; }
     .boleta .fecha { font-weight: 600; color: var(--texto); }
 
-    .pie { text-align: center; color: #8e9ab0; font-size: 12px; margin-top: 20px; }
+    .pie { text-align: center; color: #7C889B; font-size: 12px; margin-top: 22px; }
   </style>
 </head>
 <body>
+  <div class="logos">
+    <div class="logos-interna">
+      <img src="img/logo-clinica.png" alt="Clínica Pabón">
+      <img src="img/logo-centro.png" alt="Centro de Cuidados Cardioneurovasculares Pabón S.A.S." class="centro">
+    </div>
+  </div>
+
   <main class="contenedor">
-    <header class="encabezado">
-      <div class="etiqueta">Registro de colaboradores</div>
-      <h1 id="titulo-evento">Fiesta fin de año 2026</h1>
-      <p id="fecha-evento">Viernes 18 de diciembre de 2026</p>
+    <div class="bienvenida">
+      <div class="avatar"><img src="img/avatar.png" alt=""></div>
+      <div class="globo">
+        ¡Hola! Bienvenido(a) a nuestra celebración. <strong>Regístrese</strong> y reciba su número para el sorteo de premios.
+      </div>
+    </div>
+
+    <header class="titulo">
+      <h1 id="titulo-evento">Fiesta fin de año <span>2026</span></h1>
+      <span class="fecha-chip" id="fecha-evento">Viernes 18 de diciembre de 2026</span>
     </header>
 
     <section class="tarjeta">
       <!-- Formulario -->
       <form id="formulario" novalidate>
-        <h2>Regístrese para el sorteo</h2>
+        <h2>Registro de colaboradores</h2>
         <p class="ayuda">Recibirá un número único para el sorteo de premios y un código QR para su ingreso al evento.</p>
 
         <label class="campo" for="identificacion">Número de identificación</label>
@@ -217,7 +284,7 @@
           </p>
         </details>
 
-        <button type="submit" id="boton">Registrarme</button>
+        <button type="submit" id="boton" class="rojo">Registrarme</button>
         <div class="mensaje" id="mensaje" role="alert"></div>
       </form>
 
@@ -237,7 +304,7 @@
           <span class="fecha" id="fecha-boleta">viernes 18 de diciembre de 2026</span>
           y registrar su ingreso con este código.
         </p>
-        <button type="button" id="descargar">Descargar boleta</button>
+        <button type="button" id="descargar" class="rojo">Descargar boleta</button>
         <button type="button" class="secundario" id="otro">Registrar a otra persona</button>
       </div>
     </section>
@@ -258,11 +325,32 @@
     const mensaje = $('mensaje');
     const boton = $('boton');
 
+    const COLOR = { azul: '#195BA7', azulOscuro: '#0F3F7A', rojo: '#E51C21', celeste: '#6ECAF0', suave: '#5B6576', texto: '#1B2433' };
+
     let ultimo = null; // { numero, nombre, codigo }
 
-    $('titulo-evento').textContent = cfg.EVENTO_NOMBRE;
+    // Título: "Fiesta fin de año" + año resaltado en rojo
+    (function pintarTitulo() {
+      const nombre = cfg.EVENTO_NOMBRE || 'Fiesta fin de año 2026';
+      const m = nombre.match(/^(.*?)(\s\d{4})$/);
+      const h1 = $('titulo-evento');
+      h1.textContent = m ? m[1] + ' ' : nombre;
+      if (m) {
+        const anio = document.createElement('span');
+        anio.textContent = m[2].trim();
+        h1.appendChild(anio);
+      }
+    })();
     $('fecha-evento').textContent = cfg.EVENTO_FECHA;
     $('fecha-boleta').textContent = cfg.EVENTO_FECHA.toLowerCase();
+
+    // Logos para la boleta descargable
+    function cargarImagen(src) {
+      const img = new Image();
+      img.src = src;
+      return img;
+    }
+    const logos = [cargarImagen('img/logo-clinica.png'), cargarImagen('img/logo-centro.png')];
 
     function mostrarError(texto) {
       mensaje.textContent = texto;
@@ -276,7 +364,7 @@
         text: codigo,
         width: 400,
         height: 400,
-        colorDark: '#1b2433',
+        colorDark: COLOR.azulOscuro,
         colorLight: '#ffffff',
         correctLevel: QRCode.CorrectLevel.M
       });
@@ -335,50 +423,81 @@
       }
     });
 
-    // Genera una imagen PNG con el número, el nombre y el QR
-    $('descargar').addEventListener('click', () => {
-      if (!ultimo) return;
+    // Dibuja la boleta (con o sin logos) y devuelve la imagen PNG
+    function generarBoleta(conLogos) {
       const qrCanvas = $('qr').querySelector('canvas');
-      if (!qrCanvas) return;
-
-      const ancho = 600, alto = 860;
+      const ancho = 600, alto = 900;
       const c = document.createElement('canvas');
       c.width = ancho; c.height = alto;
       const ctx = c.getContext('2d');
 
-      ctx.fillStyle = '#0f1d33';
+      // Fondo y tarjeta
+      ctx.fillStyle = COLOR.azul;
       ctx.fillRect(0, 0, ancho, alto);
       ctx.fillStyle = '#ffffff';
-      ctx.fillRect(30, 30, ancho - 60, alto - 60);
+      ctx.fillRect(24, 24, ancho - 48, alto - 48);
+      ctx.fillStyle = COLOR.rojo;
+      ctx.fillRect(24, 24, ancho - 48, 8);
 
       ctx.textAlign = 'center';
-      ctx.fillStyle = '#a8761c';
-      ctx.font = '600 22px Inter, Arial, sans-serif';
-      ctx.fillText(cfg.EVENTO_NOMBRE.toUpperCase(), ancho / 2, 90);
-      ctx.fillStyle = '#5b6576';
-      ctx.font = '400 20px Inter, Arial, sans-serif';
-      ctx.fillText(cfg.EVENTO_FECHA, ancho / 2, 122);
+      let y = 60;
 
-      ctx.fillStyle = '#1b2433';
-      ctx.font = '600 26px Inter, Arial, sans-serif';
-      ctx.fillText(ultimo.nombre, ancho / 2, 180);
+      if (conLogos && logos.every((img) => img.complete && img.naturalWidth)) {
+        const alturas = [62, 52];
+        const anchos = logos.map((img, i) => img.naturalWidth * alturas[i] / img.naturalHeight);
+        const espacio = 30;
+        let x = (ancho - (anchos[0] + anchos[1] + espacio)) / 2;
+        logos.forEach((img, i) => {
+          ctx.drawImage(img, x, y + (62 - alturas[i]) / 2, anchos[i], alturas[i]);
+          x += anchos[i] + espacio;
+        });
+        y += 100;
+      } else {
+        y += 30;
+      }
 
-      ctx.fillStyle = '#5b6576';
-      ctx.font = '600 16px Inter, Arial, sans-serif';
-      ctx.fillText('NÚMERO PARA EL SORTEO', ancho / 2, 230);
-      ctx.fillStyle = '#1b2433';
-      ctx.font = '800 96px Fraunces, Georgia, serif';
-      ctx.fillText(String(ultimo.numero), ancho / 2, 325);
+      ctx.fillStyle = COLOR.azulOscuro;
+      ctx.font = '700 30px Poppins, Arial, sans-serif';
+      ctx.fillText(cfg.EVENTO_NOMBRE, ancho / 2, y);
+      ctx.fillStyle = COLOR.rojo;
+      ctx.font = '600 19px Inter, Arial, sans-serif';
+      ctx.fillText(cfg.EVENTO_FECHA, ancho / 2, y + 32);
 
-      ctx.drawImage(qrCanvas, (ancho - 380) / 2, 370, 380, 380);
+      ctx.fillStyle = COLOR.texto;
+      ctx.font = '600 24px Inter, Arial, sans-serif';
+      ctx.fillText(ultimo.nombre, ancho / 2, y + 84);
 
-      ctx.fillStyle = '#5b6576';
-      ctx.font = '400 18px Inter, Arial, sans-serif';
-      ctx.fillText('Presente este código QR al ingresar al evento', ancho / 2, 790);
+      ctx.fillStyle = COLOR.azul;
+      ctx.font = '600 15px Inter, Arial, sans-serif';
+      ctx.fillText('NÚMERO PARA EL SORTEO', ancho / 2, y + 124);
+      ctx.fillStyle = COLOR.rojo;
+      ctx.font = '800 92px Poppins, Arial, sans-serif';
+      ctx.fillText(String(ultimo.numero), ancho / 2, y + 210);
+
+      const lado = 330;
+      ctx.drawImage(qrCanvas, (ancho - lado) / 2, y + 236, lado, lado);
+
+      ctx.fillStyle = COLOR.suave;
+      ctx.font = '400 17px Inter, Arial, sans-serif';
+      ctx.fillText('Presente este código QR al ingresar al evento', ancho / 2, alto - 52);
+
+      return c.toDataURL('image/png');
+    }
+
+    $('descargar').addEventListener('click', () => {
+      if (!ultimo || !$('qr').querySelector('canvas')) return;
+
+      let imagen;
+      try {
+        imagen = generarBoleta(true);
+      } catch (err) {
+        // Si el navegador no permite usar los logos (por ejemplo, abriendo el archivo local), sin logos
+        imagen = generarBoleta(false);
+      }
 
       const enlace = document.createElement('a');
       enlace.download = 'boleta-fiesta-' + ultimo.numero + '.png';
-      enlace.href = c.toDataURL('image/png');
+      enlace.href = imagen;
       document.body.appendChild(enlace);
       enlace.click();
       enlace.remove();
