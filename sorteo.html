@@ -3,8 +3,11 @@
      Fiesta fin de año 2026 - Pantalla del sorteo (para proyectar)
      Ruta en el repositorio: sorteo.html
      Uso: solo usuarios con rol "admin"
-     El ganador lo elige la base de datos (función sortear); la animación
-     solo muestra el resultado. Teclas: Espacio = sortear, Flecha derecha = siguiente premio
+     Cada sorteo se crea en vivo: tipo de personal + rangos de antigüedad.
+     Solo participan quienes registraron su ingreso al evento.
+     El ganador lo elige la base de datos (sortear_nuevo); la animación
+     solo muestra el resultado.
+     Teclas: Espacio = sortear / pasar al siguiente sorteo
      ===================================================================== -->
 <html lang="es">
 <head>
@@ -19,18 +22,16 @@
       --fondo: #0b1628;
       --fondo-2: #16294a;
       --panel: rgba(255,255,255,.06);
-      --borde: rgba(255,255,255,.12);
+      --borde: rgba(255,255,255,.14);
       --texto: #ffffff;
       --texto-suave: #b9c4d8;
       --dorado: #d9a441;
       --dorado-claro: #f1c96b;
       --verde: #5fd08f;
-      --rojo: #ff8a80;
       --radio: 18px;
     }
 
     * { box-sizing: border-box; }
-
     html, body { height: 100%; }
 
     body {
@@ -59,6 +60,19 @@
     button:disabled { opacity: .45; cursor: not-allowed; }
     button.borde { background: transparent; color: var(--texto-suave); border: 1px solid var(--borde); }
     button.borde:hover:not(:disabled) { color: #fff; border-color: rgba(255,255,255,.35); }
+
+    a.borde {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 12px;
+      color: var(--texto-suave);
+      border: 1px solid var(--borde);
+      text-decoration: none;
+    }
+    a.borde:hover { color: #fff; border-color: rgba(255,255,255,.35); }
 
     .oculto { display: none !important; }
 
@@ -94,14 +108,14 @@
       .escenario-grid { grid-template-columns: 1fr; }
     }
 
-    /* ---------- Escenario principal ---------- */
+    /* ---------- Escenario ---------- */
     .escenario {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: clamp(20px, 3vw, 40px) 12px;
+      padding: clamp(16px, 2.5vw, 36px) 8px;
     }
     .posicion {
       font-size: clamp(13px, 1.2vw, 16px);
@@ -118,21 +132,50 @@
       margin: 0 0 8px;
       max-width: 22ch;
     }
-    .premio-detalle { color: var(--texto-suave); font-size: clamp(14px, 1.4vw, 20px); margin: 0 0 4px; }
     .premio-para {
       display: inline-block;
-      margin-top: 10px;
+      margin-top: 6px;
       padding: 6px 14px;
       border-radius: 999px;
       border: 1px solid rgba(217,164,65,.45);
       color: var(--dorado-claro);
       font-size: clamp(13px, 1.2vw, 16px);
+      max-width: 90%;
     }
 
+    /* Configuración del sorteo nuevo */
+    .config { width: min(760px, 100%); }
+    .config { margin-top: 18px; }
+    .grupo-filtro { margin-bottom: 14px; }
+    .grupo-filtro .etiqueta {
+      font-size: 12px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--texto-suave);
+      margin-bottom: 8px;
+    }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+    .chips button {
+      background: transparent;
+      color: var(--texto-suave);
+      border: 1.5px solid var(--borde);
+      border-radius: 999px;
+      padding: 9px 16px;
+      font-size: clamp(13px, 1.1vw, 15px);
+      font-weight: 500;
+    }
+    .chips button[aria-pressed="true"] {
+      background: rgba(217,164,65,.18);
+      border-color: var(--dorado);
+      color: #fff;
+      font-weight: 600;
+    }
+    .chips button[aria-pressed="true"]::before { content: '✓ '; color: var(--dorado-claro); }
+
     .numero-caja {
-      margin: clamp(20px, 3vw, 36px) 0 clamp(14px, 2vw, 22px);
+      margin: clamp(16px, 2.5vw, 30px) 0 clamp(12px, 1.8vw, 20px);
       min-width: min(520px, 90%);
-      padding: clamp(10px, 1.5vw, 18px) clamp(24px, 4vw, 60px);
+      padding: clamp(8px, 1.3vw, 16px) clamp(24px, 4vw, 60px);
       border-radius: 28px;
       border: 2px solid rgba(217,164,65,.55);
       background: rgba(0,0,0,.18);
@@ -149,12 +192,13 @@
       display: block;
       font-family: 'Fraunces', Georgia, serif;
       font-weight: 800;
-      font-size: clamp(110px, 17vw, 260px);
+      font-size: clamp(100px, 15vw, 240px);
       line-height: 1;
       color: var(--dorado-claro);
       font-variant-numeric: tabular-nums;
       text-shadow: 0 6px 40px rgba(217,164,65,.35);
     }
+    .modo-nuevo #numero { font-size: clamp(80px, 10vw, 160px); }
     .girando #numero { color: #fff; }
     .revelado #numero { animation: latido .6s ease-out; }
     @keyframes latido {
@@ -163,7 +207,7 @@
       100% { transform: scale(1); }
     }
 
-    .ganador { min-height: clamp(70px, 9vw, 120px); }
+    .ganador { min-height: clamp(60px, 8vw, 110px); }
     .ganador .titulo {
       color: var(--verde);
       font-weight: 600;
@@ -180,31 +224,30 @@
     }
     .ganador .cargo { color: var(--texto-suave); font-size: clamp(14px, 1.3vw, 19px); margin-top: 6px; }
     .ganador .estado-juego { color: var(--texto-suave); font-size: clamp(15px, 1.5vw, 21px); }
+    .ganador .estado-juego strong { color: #fff; }
 
-    .acciones-escenario { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: clamp(14px, 2vw, 24px); }
-    #sortear {
+    .acciones-escenario { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: clamp(12px, 1.8vw, 22px); }
+    .boton-grande {
       font-size: clamp(18px, 1.8vw, 24px);
       padding: 16px 48px;
       border-radius: 999px;
       box-shadow: 0 10px 40px rgba(217,164,65,.35);
     }
-    #siguiente { font-size: 16px; padding: 14px 28px; border-radius: 999px; }
 
     .anular-caja {
-      margin-top: 16px;
+      margin: 16px auto 0;
       padding: 16px;
       border: 1px solid var(--borde);
       border-radius: 14px;
       background: rgba(0,0,0,.25);
-      max-width: 520px;
+      max-width: 560px;
     }
     .anular-caja p { margin: 0 0 12px; color: var(--texto-suave); font-size: 14px; }
     .anular-caja .acciones-escenario { margin-top: 0; }
 
-    .vacio-escenario { color: var(--texto-suave); font-size: 18px; max-width: 32ch; line-height: 1.5; }
-    .vacio-escenario a { color: var(--dorado-claro); }
+    .atajo { margin-top: 14px; font-size: 12.5px; color: rgba(255,255,255,.4); }
 
-    /* ---------- Lista de premios ---------- */
+    /* ---------- Historial ---------- */
     aside {
       background: var(--panel);
       border: 1px solid var(--borde);
@@ -214,10 +257,11 @@
       max-height: calc(100vh - 120px);
       overflow-y: auto;
     }
-    aside h2 { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--texto-suave); margin: 0 0 12px; font-weight: 600; }
-    aside .progreso { font-size: 13px; color: var(--texto-suave); margin: -6px 0 12px; }
-    #lista-premios { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-    #lista-premios button {
+    aside h2 { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--texto-suave); margin: 0 0 4px; font-weight: 600; }
+    aside .progreso { font-size: 13px; color: var(--texto-suave); margin: 0 0 12px; }
+    #nuevo-lateral { width: 100%; margin-bottom: 12px; }
+    #lista-sorteos { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+    #lista-sorteos button {
       width: 100%;
       text-align: left;
       background: transparent;
@@ -227,15 +271,17 @@
       padding: 10px 12px;
       font-weight: 500;
       display: grid;
-      grid-template-columns: 26px 1fr;
+      grid-template-columns: 30px 1fr;
       gap: 2px 8px;
     }
-    #lista-premios button:hover:not(:disabled) { border-color: rgba(255,255,255,.35); }
-    #lista-premios button.activo { border-color: var(--dorado); background: rgba(217,164,65,.12); }
-    #lista-premios .orden { color: var(--dorado); font-weight: 700; grid-row: span 2; }
-    #lista-premios .nombre-premio { font-weight: 600; font-size: 14px; }
-    #lista-premios .info { font-size: 12.5px; color: var(--texto-suave); }
-    #lista-premios .info.listo { color: var(--verde); }
+    #lista-sorteos button:hover:not(:disabled) { border-color: rgba(255,255,255,.35); }
+    #lista-sorteos button.activo { border-color: var(--dorado); background: rgba(217,164,65,.12); }
+    #lista-sorteos .orden { color: var(--dorado); font-weight: 700; grid-row: span 3; }
+    #lista-sorteos .nombre-sorteo { font-weight: 600; font-size: 14px; }
+    #lista-sorteos .para { font-size: 12px; color: var(--texto-suave); }
+    #lista-sorteos .info { font-size: 12.5px; color: var(--texto-suave); }
+    #lista-sorteos .info.listo { color: var(--verde); }
+    .vacio-lista { color: var(--texto-suave); font-size: 14px; }
 
     /* ---------- Inicio de sesión ---------- */
     .login {
@@ -288,10 +334,13 @@
       <small>Sorteo de premios</small>
       <strong id="titulo-evento">Fiesta fin de año 2026</strong>
     </div>
-    <div class="controles oculto" id="controles">
-      <button type="button" class="borde" id="pantalla-completa">Pantalla completa</button>
-      <button type="button" class="borde" id="actualizar">Actualizar</button>
-      <button type="button" class="borde" id="salir">Cerrar sesión</button>
+    <div class="controles">
+      <a class="borde" href="menu.html">← Menú</a>
+      <span class="controles oculto" id="controles">
+        <button type="button" class="borde" id="pantalla-completa">Pantalla completa</button>
+        <button type="button" class="borde" id="actualizar">Actualizar</button>
+        <button type="button" class="borde" id="salir">Cerrar sesión</button>
+      </span>
     </div>
   </header>
 
@@ -312,45 +361,56 @@
   <!-- Sorteo -->
   <div class="escenario-grid oculto" id="vista-sorteo">
     <section class="escenario" id="escenario" aria-live="polite">
-      <div id="sin-premios" class="vacio-escenario oculto">
-        Aún no hay premios creados.<br>
-        Créelos en el <a href="admin.html">panel de administración</a>, pestaña Premios.
+      <div class="posicion" id="posicion"></div>
+
+      <!-- Nombre del sorteo (automático: Sorteo 1, Sorteo 2, ...) -->
+      <h1 class="premio-nombre" id="premio-nombre"></h1>
+
+      <!-- Modo "ver": filtros del sorteo ya creado -->
+      <span class="premio-para oculto" id="premio-para"></span>
+
+      <!-- Modo "nuevo": se eligen los filtros -->
+      <div class="config" id="config">
+        <div class="grupo-filtro">
+          <div class="etiqueta">Tipo de personal</div>
+          <div class="chips" id="chips-tipo"></div>
+        </div>
+        <div class="grupo-filtro">
+          <div class="etiqueta">Antigüedad</div>
+          <div class="chips" id="chips-rango"></div>
+        </div>
       </div>
 
-      <div id="con-premios">
-        <div class="posicion" id="posicion"></div>
-        <h1 class="premio-nombre" id="premio-nombre"></h1>
-        <p class="premio-detalle oculto" id="premio-descripcion"></p>
-        <span class="premio-para" id="premio-para"></span>
+      <div class="numero-caja">
+        <span>Número ganador</span>
+        <strong id="numero">?</strong>
+      </div>
 
-        <div class="numero-caja">
-          <span>Número ganador</span>
-          <strong id="numero">?</strong>
-        </div>
+      <div class="ganador" id="ganador"></div>
 
-        <div class="ganador" id="ganador"></div>
+      <div class="acciones-escenario">
+        <button type="button" class="boton-grande" id="sortear">Sortear</button>
+        <button type="button" class="boton-grande oculto" id="nuevo">Nuevo sorteo</button>
+        <button type="button" class="borde oculto" id="anular">Anular ganador</button>
+      </div>
 
+      <div class="anular-caja oculto" id="anular-caja">
+        <p>¿Por qué se anula este ganador? El sorteo quedará pendiente para volver a sortearse con los mismos filtros.</p>
         <div class="acciones-escenario">
-          <button type="button" id="sortear">Sortear</button>
-          <button type="button" id="siguiente" class="oculto">Siguiente premio →</button>
-          <button type="button" class="borde oculto" id="anular">Anular ganador</button>
-        </div>
-
-        <div class="anular-caja oculto" id="anular-caja">
-          <p>¿Por qué se anula este ganador? El premio quedará libre para sortearse de nuevo.</p>
-          <div class="acciones-escenario">
-            <button type="button" id="anular-ausente">No está presente (sale del sorteo)</button>
-            <button type="button" class="borde" id="anular-error">Error (sigue participando)</button>
-            <button type="button" class="borde" id="anular-cancelar">Cancelar</button>
-          </div>
+          <button type="button" id="anular-ausente">No está presente (sale del sorteo)</button>
+          <button type="button" class="borde" id="anular-error">Error (sigue participando)</button>
+          <button type="button" class="borde" id="anular-cancelar">Cancelar</button>
         </div>
       </div>
+
+      <div class="atajo" id="atajo">Barra espaciadora: sortear</div>
     </section>
 
     <aside>
-      <h2>Premios</h2>
+      <h2>Sorteos de la noche</h2>
       <p class="progreso" id="progreso"></p>
-      <ul id="lista-premios"></ul>
+      <button type="button" class="borde" id="nuevo-lateral">+ Nuevo sorteo</button>
+      <ul id="lista-sorteos"></ul>
     </aside>
   </div>
 
@@ -363,13 +423,16 @@
     const cfg = window.APP_CONFIG;
     const db = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_KEY);
     const $ = (id) => document.getElementById(id);
+    const TIPOS = ['Asistencial', 'Administrativo'];
 
     const estado = {
       participantes: [],
       premios: [],
       ganadores: [],
       rangos: [],
-      actual: null,       // id del premio en pantalla
+      modo: 'nuevo',     // 'nuevo' = configurando | 'ver' = sorteo ya creado
+      actual: null,      // id del sorteo en pantalla (modo 'ver')
+      filtro: { tipos: [...TIPOS], rangos: null },  // rangos: null = todos (se llena al cargar)
       girando: false,
       sesion: false
     };
@@ -492,10 +555,11 @@
         estado.premios = premios.sort((a, b) => (a.orden - b.orden) || (a.id - b.id));
         estado.ganadores = ganadores;
         estado.rangos = rangos;
+        if (estado.filtro.rangos === null) estado.filtro.rangos = rangos.map((r) => r.id);
 
-        if (!estado.premios.some((p) => p.id === estado.actual)) {
-          const pendiente = siguientePendiente();
-          estado.actual = pendiente ? pendiente.id : (estado.premios[0] ? estado.premios[0].id : null);
+        if (estado.modo === 'ver' && !estado.premios.some((p) => p.id === estado.actual)) {
+          estado.modo = 'nuevo';
+          estado.actual = null;
         }
         if (!estado.girando) pintar();
       } catch (err) {
@@ -506,12 +570,16 @@
 
     $('actualizar').addEventListener('click', () => cargarDatos(false));
 
-    // Actualiza cada 20 segundos (llegan asistentes durante el evento)
+    // Se actualiza cada 20 segundos (siguen llegando asistentes)
     setInterval(() => {
       if (estado.sesion && !estado.girando) cargarDatos(true);
     }, 20000);
 
     function premioActual() { return estado.premios.find((p) => p.id === estado.actual) || null; }
+
+    function siguienteOrden() {
+      return estado.premios.reduce((m, p) => Math.max(m, p.orden || 0), 0) + 1;
+    }
 
     function ganadorDe(premioId) {
       const g = estado.ganadores.find((x) => x.premio_id === premioId);
@@ -519,27 +587,32 @@
       return estado.participantes.find((p) => p.numero === g.numero) || { numero: g.numero, nombres: '', apellidos: '' };
     }
 
-    function candidatos(premio) {
+    // Filtro del sorteo nuevo -> formato de la base de datos (null = todos)
+    function filtroParaBD() {
+      const f = estado.filtro;
+      return {
+        tipo: f.tipos.length === TIPOS.length ? null : f.tipos[0],
+        rangos: f.rangos.length === estado.rangos.length ? null : [...f.rangos].sort((a, b) => a - b)
+      };
+    }
+
+    // Asistentes que cumplen un filtro { tipo, rangos } y aún no han ganado
+    function candidatos(filtro) {
       return estado.participantes.filter((p) =>
         p.asistio && !p.ya_gano
-        && (!premio.tipo_personal || p.tipo_personal === premio.tipo_personal)
-        && (!premio.rango_antiguedad || p.rango_id === premio.rango_antiguedad)
+        && (!filtro.tipo || p.tipo_personal === filtro.tipo)
+        && (!filtro.rangos || !filtro.rangos.length || filtro.rangos.includes(p.rango_id))
       );
     }
 
-    function siguientePendiente(despuesDe) {
-      const lista = estado.premios;
-      const desde = despuesDe ? lista.findIndex((p) => p.id === despuesDe) + 1 : 0;
-      return lista.slice(desde).find((p) => !ganadorDe(p.id))
-        || lista.slice(0, desde).find((p) => !ganadorDe(p.id))
-        || null;
-    }
+    function filtroDePremio(pr) { return { tipo: pr.tipo_personal, rangos: pr.rangos }; }
 
-    function textoPara(premio) {
-      const partes = [];
-      if (premio.tipo_personal) partes.push('Personal ' + premio.tipo_personal.toLowerCase());
-      if (premio.rango_antiguedad) partes.push(nombreRango(premio.rango_antiguedad));
-      return partes.length ? 'Para: ' + partes.join(' · ') : 'Para todos los asistentes';
+    function textoPara(filtro) {
+      const tipo = filtro.tipo ? 'Personal ' + filtro.tipo.toLowerCase() : 'Todo el personal';
+      const rangos = (!filtro.rangos || !filtro.rangos.length || filtro.rangos.length === estado.rangos.length)
+        ? 'Toda antigüedad'
+        : filtro.rangos.map(nombreRango).join(' · ');
+      return tipo + ' · ' + rangos;
     }
 
     // ---------------------------------------------------------------
@@ -550,20 +623,36 @@
       pintarEscenario();
     }
 
+    function pintarChips() {
+      const f = estado.filtro;
+      $('chips-tipo').innerHTML = TIPOS.map((t) =>
+        `<button type="button" data-tipo="${t}" aria-pressed="${f.tipos.includes(t)}">${t}</button>`
+      ).join('');
+      $('chips-rango').innerHTML = estado.rangos.map((r) =>
+        `<button type="button" data-rango="${r.id}" aria-pressed="${f.rangos.includes(r.id)}">${esc(r.nombre)}</button>`
+      ).join('');
+    }
+
     function pintarLista() {
       const total = estado.premios.length;
       const listos = estado.premios.filter((p) => ganadorDe(p.id)).length;
-      $('progreso').textContent = total ? `${listos} de ${total} sorteados` : '';
+      $('progreso').textContent = total
+        ? `${listos} ${listos === 1 ? 'ganador' : 'ganadores'}${total > listos ? ' · ' + (total - listos) + ' pendiente(s)' : ''}`
+        : 'Aún no se ha realizado ningún sorteo.';
+      $('nuevo-lateral').disabled = estado.girando;
 
-      $('lista-premios').innerHTML = estado.premios.map((pr) => {
+      const recientes = [...estado.premios].reverse();
+      $('lista-sorteos').innerHTML = recientes.map((pr) => {
         const g = ganadorDe(pr.id);
         const info = g
           ? `<span class="info listo">N.º ${g.numero} · ${esc(g.nombres)} ${esc(g.apellidos)}</span>`
-          : `<span class="info">${candidatos(pr).length} en juego</span>`;
+          : `<span class="info">Pendiente · ${candidatos(filtroDePremio(pr)).length} en juego</span>`;
+        const activo = estado.modo === 'ver' && pr.id === estado.actual;
         return `<li>
-          <button type="button" data-premio="${pr.id}" class="${pr.id === estado.actual ? 'activo' : ''}" ${estado.girando ? 'disabled' : ''}>
+          <button type="button" data-premio="${pr.id}" class="${activo ? 'activo' : ''}" ${estado.girando ? 'disabled' : ''}>
             <span class="orden">${pr.orden}</span>
-            <span class="nombre-premio">${esc(pr.nombre)}</span>
+            <span class="nombre-sorteo">${esc(pr.nombre)}</span>
+            <span class="para">${esc(textoPara(filtroDePremio(pr)))}</span>
             ${info}
           </button>
         </li>`;
@@ -571,40 +660,58 @@
     }
 
     function pintarEscenario() {
-      const pr = premioActual();
-      mostrar('sin-premios', !pr);
-      mostrar('con-premios', !!pr);
-      mostrar('anular-caja', false);
-      if (!pr) return;
-
-      const indice = estado.premios.findIndex((p) => p.id === pr.id);
-      $('posicion').textContent = `Premio ${indice + 1} de ${estado.premios.length}`;
-      $('premio-nombre').textContent = pr.nombre;
-      $('premio-descripcion').textContent = pr.descripcion || '';
-      mostrar('premio-descripcion', !!pr.descripcion);
-      $('premio-para').textContent = textoPara(pr);
-
       const escenario = $('escenario');
       escenario.classList.remove('girando', 'revelado');
+      escenario.classList.toggle('modo-nuevo', estado.modo === 'nuevo');
+      mostrar('anular-caja', false);
+
+      if (estado.modo === 'nuevo') {
+        const n = candidatos(filtroParaBD()).length;
+        $('posicion').textContent = 'Nuevo sorteo';
+        $('premio-nombre').textContent = 'Sorteo ' + siguienteOrden();
+        mostrar('config', true);
+        mostrar('premio-para', false);
+        pintarChips();
+        $('numero').textContent = '?';
+        $('ganador').innerHTML = n
+          ? `<div class="estado-juego"><strong>${n}</strong> ${n === 1 ? 'asistente' : 'asistentes'} en juego</div>`
+          : '<div class="estado-juego">No hay asistentes disponibles con estos filtros.</div>';
+        mostrar('sortear', true);
+        $('sortear').disabled = n === 0;
+        mostrar('nuevo', false);
+        mostrar('anular', false);
+        $('atajo').textContent = 'Barra espaciadora: sortear';
+        return;
+      }
+
+      const pr = premioActual();
+      if (!pr) { estado.modo = 'nuevo'; pintarEscenario(); return; }
 
       const g = ganadorDe(pr.id);
+      mostrar('config', false);
+      mostrar('premio-para', true);
+      $('posicion').textContent = g ? 'Resultado' : 'Sorteo pendiente';
+      $('premio-nombre').textContent = pr.nombre;
+      $('premio-para').textContent = textoPara(filtroDePremio(pr));
+
       if (g) {
         $('numero').textContent = g.numero;
         pintarGanador(g);
         mostrar('sortear', false);
+        mostrar('nuevo', true);
         mostrar('anular', true);
-        const sig = siguientePendiente(pr.id);
-        mostrar('siguiente', !!sig);
+        $('atajo').textContent = 'Barra espaciadora: nuevo sorteo';
       } else {
-        const n = candidatos(pr).length;
+        const n = candidatos(filtroDePremio(pr)).length;
         $('numero').textContent = '?';
         $('ganador').innerHTML = n
-          ? `<div class="estado-juego">${n} ${n === 1 ? 'participante' : 'participantes'} en juego</div>`
-          : `<div class="estado-juego">No hay asistentes disponibles para este premio.</div>`;
+          ? `<div class="estado-juego">Sorteo pendiente · <strong>${n}</strong> ${n === 1 ? 'asistente' : 'asistentes'} en juego</div>`
+          : '<div class="estado-juego">No hay asistentes disponibles para este sorteo.</div>';
         mostrar('sortear', true);
         $('sortear').disabled = n === 0;
+        mostrar('nuevo', true);
         mostrar('anular', false);
-        mostrar('siguiente', false);
+        $('atajo').textContent = 'Barra espaciadora: sortear';
       }
     }
 
@@ -615,27 +722,64 @@
         <div class="cargo">${esc([g.cargo, g.empresa].filter(Boolean).join(' · '))}</div>`;
     }
 
-    $('lista-premios').addEventListener('click', (e) => {
-      const boton = e.target.closest('button[data-premio]');
-      if (!boton || estado.girando) return;
-      estado.actual = Number(boton.dataset.premio);
-      pintar();
+    // ---------------------------------------------------------------
+    // Filtros (casillas). Siempre queda al menos una marcada por grupo.
+    // ---------------------------------------------------------------
+    $('chips-tipo').addEventListener('click', (e) => {
+      const b = e.target.closest('button[data-tipo]');
+      if (!b || estado.girando) return;
+      b.blur();
+      const t = b.dataset.tipo;
+      const lista = estado.filtro.tipos;
+      if (lista.includes(t)) {
+        if (lista.length === 1) { aviso('Debe quedar al menos un tipo de personal.'); return; }
+        estado.filtro.tipos = lista.filter((x) => x !== t);
+      } else {
+        estado.filtro.tipos = TIPOS.filter((x) => x === t || lista.includes(x));
+      }
+      pintarEscenario();
     });
 
-    $('siguiente').addEventListener('click', irSiguiente);
+    $('chips-rango').addEventListener('click', (e) => {
+      const b = e.target.closest('button[data-rango]');
+      if (!b || estado.girando) return;
+      b.blur();
+      const id = Number(b.dataset.rango);
+      const lista = estado.filtro.rangos;
+      if (lista.includes(id)) {
+        if (lista.length === 1) { aviso('Debe quedar al menos un rango de antigüedad.'); return; }
+        estado.filtro.rangos = lista.filter((x) => x !== id);
+      } else {
+        estado.filtro.rangos = [...lista, id];
+      }
+      pintarEscenario();
+    });
 
-    function irSiguiente() {
+    // ---------------------------------------------------------------
+    // Navegación
+    // ---------------------------------------------------------------
+    function irANuevo() {
       if (estado.girando) return;
-      const sig = siguientePendiente(estado.actual);
-      if (!sig) return;
-      estado.actual = sig.id;
+      estado.modo = 'nuevo';
+      estado.actual = null;
       pintar();
     }
+
+    $('nuevo').addEventListener('click', irANuevo);
+    $('nuevo-lateral').addEventListener('click', irANuevo);
+
+    $('lista-sorteos').addEventListener('click', (e) => {
+      const b = e.target.closest('button[data-premio]');
+      if (!b || estado.girando) return;
+      estado.modo = 'ver';
+      estado.actual = Number(b.dataset.premio);
+      pintar();
+    });
 
     // ---------------------------------------------------------------
     // Sorteo
     // ---------------------------------------------------------------
-    // Muestra números al azar del grupo y se detiene en el número que eligió el servidor
+    // Muestra números al azar del grupo y se detiene en el que eligió el servidor
     function iniciarGiro(numeros) {
       const caja = $('numero');
       const inicio = performance.now();
@@ -673,9 +817,15 @@
     }
 
     async function sortear() {
-      const pr = premioActual();
-      if (!pr || estado.girando || ganadorDe(pr.id)) return;
-      const grupo = candidatos(pr);
+      if (estado.girando) return;
+
+      // ¿Sorteo nuevo o un sorteo pendiente (anulado)?
+      const esNuevo = estado.modo === 'nuevo';
+      const pr = esNuevo ? null : premioActual();
+      if (!esNuevo && (!pr || ganadorDe(pr.id))) return;
+
+      const filtro = esNuevo ? filtroParaBD() : filtroDePremio(pr);
+      const grupo = candidatos(filtro);
       if (!grupo.length) return;
 
       estado.girando = true;
@@ -683,9 +833,18 @@
       $('escenario').classList.add('girando');
       $('ganador').innerHTML = '<div class="estado-juego">Sorteando…</div>';
       pintarLista();
+      if (esNuevo) {
+        // Mientras gira se muestran los filtros del sorteo en lugar de las casillas
+        $('posicion').textContent = 'Sorteando';
+        mostrar('config', false);
+        mostrar('premio-para', true);
+        $('premio-para').textContent = textoPara(filtro);
+      }
 
       const giro = iniciarGiro(grupo.map((p) => p.numero));
-      const { data, error } = await db.rpc('sortear', { p_premio_id: pr.id });
+      const { data, error } = esNuevo
+        ? await db.rpc('sortear_nuevo', { p_nombre: null, p_tipo: filtro.tipo, p_rangos: filtro.rangos })
+        : await db.rpc('sortear', { p_premio_id: pr.id });
 
       if (error) {
         giro.detener();
@@ -698,23 +857,31 @@
 
       await giro.terminarEn(data.numero);
 
-      // Actualiza el estado local con el ganador
-      estado.ganadores.push({ premio_id: pr.id, numero: data.numero });
+      // Estado local con el nuevo ganador
+      const premioId = esNuevo ? data.premio_id : pr.id;
+      if (esNuevo) {
+        estado.premios.push({
+          id: data.premio_id,
+          nombre: data.premio,
+          orden: siguienteOrden(),
+          tipo_personal: filtro.tipo,
+          rangos: filtro.rangos
+        });
+      }
+      estado.ganadores.push({ premio_id: premioId, numero: data.numero });
       const p = estado.participantes.find((x) => x.numero === data.numero);
       if (p) p.ya_gano = true;
       else estado.participantes.push({ ...data, asistio: true, ya_gano: true });
 
       estado.girando = false;
+      estado.modo = 'ver';
+      estado.actual = premioId;
+      pintar();
       const escenario = $('escenario');
-      escenario.classList.remove('girando');
       void escenario.offsetWidth;
       escenario.classList.add('revelado');
-      pintarGanador(data);
-      mostrar('sortear', false);
-      mostrar('anular', true);
-      mostrar('siguiente', !!siguientePendiente(pr.id));
-      pintarLista();
       lanzarConfeti();
+      cargarDatos(true);
     }
 
     $('sortear').addEventListener('click', sortear);
@@ -743,23 +910,20 @@
       if (r2.error) { aviso('No se pudo anular: ' + r2.error.message, true); return; }
 
       aviso(sacarDelSorteo
-        ? `El N.º ${g.numero} sale del sorteo. El premio queda libre.`
-        : 'Ganador anulado. El premio queda libre.');
+        ? `El N.º ${g.numero} sale del sorteo. El sorteo queda pendiente.`
+        : 'Ganador anulado. El sorteo queda pendiente.');
       await cargarDatos(false);
     }
 
     // ---------------------------------------------------------------
-    // Teclado: Espacio/Enter = sortear, Flecha derecha = siguiente
+    // Teclado: Espacio = sortear (o pasar a un sorteo nuevo tras un ganador)
     // ---------------------------------------------------------------
     document.addEventListener('keydown', (e) => {
-      if (!estado.sesion || e.target.closest('input, textarea, select')) return;
-      if ((e.code === 'Space' || e.code === 'Enter') && !$('sortear').classList.contains('oculto') && !$('sortear').disabled) {
-        e.preventDefault();
-        sortear();
-      } else if (e.code === 'ArrowRight' && !$('siguiente').classList.contains('oculto')) {
-        e.preventDefault();
-        irSiguiente();
-      }
+      if (!estado.sesion || estado.girando || e.code !== 'Space') return;
+      if (e.target.closest('input, textarea, select, button')) return;
+      e.preventDefault();
+      if (!$('sortear').classList.contains('oculto') && !$('sortear').disabled) sortear();
+      else if (!$('nuevo').classList.contains('oculto')) irANuevo();
     });
 
     // ---------------------------------------------------------------
