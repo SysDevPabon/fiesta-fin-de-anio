@@ -3,7 +3,7 @@
      Fiesta fin de año 2026 - Panel de administración
      Ruta en el repositorio: admin.html
      Uso: solo usuarios con rol "admin"
-     Secciones: Resumen, Registrados, Premios, Usuarios
+     Secciones: Resumen, Registrados, Ganadores, Usuarios
      ===================================================================== -->
 <html lang="es">
 <head>
@@ -69,6 +69,16 @@
     .marca strong { font-family: 'Fraunces', Georgia, serif; font-size: 22px; font-weight: 800; }
     .usuario { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; color: #c9d2e3; }
     .usuario button { background: transparent; color: var(--dorado); border: 1px solid rgba(217,164,65,.5); }
+    a.enlace-menu {
+      color: #c9d2e3;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 6px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.18);
+    }
+    a.enlace-menu:hover { color: #fff; border-color: rgba(255,255,255,.4); }
 
     nav.pestanas {
       max-width: 1100px;
@@ -145,6 +155,7 @@
     th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; }
     tfoot td { font-weight: 600; border-bottom: none; }
     td .sub { color: var(--texto-suave); font-size: 12.5px; margin-top: 2px; }
+    td.nowrap { white-space: nowrap; }
     td.vacio { text-align: center; color: var(--texto-suave); padding: 28px 8px; }
 
     label.campo { display: block; font-weight: 600; font-size: 13px; margin-bottom: 6px; }
@@ -251,16 +262,19 @@
         <small>Panel de administración</small>
         <strong id="titulo-evento">Fiesta fin de año 2026</strong>
       </div>
-      <div class="usuario oculto" id="zona-usuario">
-        <span id="correo-usuario"></span>
-        <button type="button" class="mini" id="actualizar">Actualizar datos</button>
-        <button type="button" class="mini" id="salir">Cerrar sesión</button>
+      <div class="usuario">
+        <a class="enlace-menu" href="menu.html">← Menú</a>
+        <span class="usuario oculto" id="zona-usuario">
+          <span id="correo-usuario"></span>
+          <button type="button" class="mini" id="actualizar">Actualizar datos</button>
+          <button type="button" class="mini" id="salir">Cerrar sesión</button>
+        </span>
       </div>
     </div>
     <nav class="pestanas oculto" id="pestanas">
       <button type="button" data-tab="resumen" class="activa">Resumen</button>
       <button type="button" data-tab="registrados">Registrados</button>
-      <button type="button" data-tab="premios">Premios</button>
+      <button type="button" data-tab="ganadores">Ganadores</button>
       <button type="button" data-tab="usuarios">Usuarios</button>
     </nav>
   </header>
@@ -301,9 +315,9 @@
           <small id="c-asistentes-pct"></small>
         </div>
         <div class="cifra">
-          <span>Premios</span>
-          <strong id="c-premios">0</strong>
-          <small>sorteados / creados</small>
+          <span>Ganadores</span>
+          <strong id="c-ganadores">0</strong>
+          <small id="c-ganadores-detalle">sorteos realizados</small>
         </div>
       </div>
 
@@ -392,64 +406,34 @@
       </div>
     </section>
 
-    <!-- ================= Premios ================= -->
-    <section class="oculto" id="tab-premios">
+    <!-- ================= Ganadores ================= -->
+    <section class="oculto" id="tab-ganadores">
       <div class="tarjeta">
-        <h2 id="titulo-form-premio">Nuevo premio</h2>
-        <p class="ayuda">Deje "Tipo de personal" y "Antigüedad" en "Todos" si el premio es para cualquier asistente.</p>
-        <form id="form-premio" novalidate>
-          <input type="hidden" id="premio-id">
-          <div class="rejilla">
-            <div>
-              <label class="campo" for="premio-nombre">Premio</label>
-              <input type="text" id="premio-nombre" placeholder="Ej.: Televisor 50 pulgadas" required>
-            </div>
-            <div>
-              <label class="campo" for="premio-orden">Orden en el sorteo</label>
-              <input type="number" id="premio-orden" min="0" step="1">
-            </div>
-            <div>
-              <label class="campo" for="premio-tipo">Tipo de personal</label>
-              <select id="premio-tipo">
-                <option value="">Todos</option>
-                <option value="Asistencial">Solo asistencial</option>
-                <option value="Administrativo">Solo administrativo</option>
-              </select>
-            </div>
-            <div>
-              <label class="campo" for="premio-rango">Antigüedad</label>
-              <select id="premio-rango">
-                <option value="">Todos los rangos</option>
-              </select>
-            </div>
+        <div class="herramientas">
+          <div style="flex:1 1 260px">
+            <h2>Ganadores de la noche</h2>
+            <p class="ayuda" id="conteo-ganadores" style="margin:0"></p>
           </div>
-          <div style="margin-bottom:14px">
-            <label class="campo" for="premio-descripcion">Descripción (opcional)</label>
-            <input type="text" id="premio-descripcion" placeholder="Ej.: Donado por la Gerencia">
-          </div>
-          <div class="acciones">
-            <button type="submit" id="guardar-premio">Guardar premio</button>
-            <button type="button" class="secundario oculto" id="cancelar-premio">Cancelar edición</button>
-          </div>
-        </form>
-      </div>
-
-      <div class="tarjeta">
-        <h2>Premios</h2>
-        <p class="ayuda">Elegibles = asistentes que cumplen el filtro del premio y aún no han ganado.</p>
+          <button type="button" class="secundario" id="exportar-ganadores">Exportar acta a Excel</button>
+        </div>
+        <p class="ayuda">
+          Los sorteos se crean en vivo desde la pantalla del sorteo. Si se anula un ganador, el sorteo queda
+          pendiente y se vuelve a sortear desde esa misma pantalla.
+        </p>
         <div class="tabla-scroll">
           <table>
             <thead>
               <tr>
-                <th class="num">Orden</th>
-                <th>Premio</th>
-                <th>Para</th>
-                <th class="num">Elegibles</th>
+                <th>Sorteo</th>
+                <th>Filtros</th>
+                <th class="num">N.º</th>
+                <th>Identificación</th>
                 <th>Ganador</th>
+                <th>Hora</th>
                 <th></th>
               </tr>
             </thead>
-            <tbody id="tabla-premios"></tbody>
+            <tbody id="tabla-ganadores"></tbody>
           </table>
         </div>
       </div>
@@ -493,7 +477,7 @@
     const db = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_KEY);
     const $ = (id) => document.getElementById(id);
     const ZONA = 'America/Bogota';
-    const TABS = ['resumen', 'registrados', 'premios', 'usuarios'];
+    const TABS = ['resumen', 'registrados', 'ganadores', 'usuarios'];
 
     const estado = {
       participantes: [],
@@ -689,7 +673,7 @@
         pintarCifras();
         pintarEvento();
         pintarRegistrados();
-        pintarPremios();
+        pintarGanadores();
         pintarUsuarios();
       } catch (err) {
         console.error(err);
@@ -702,7 +686,7 @@
     $('actualizar').addEventListener('click', cargarDatos);
 
     function llenarSelectRangos() {
-      ['filtro-rango', 'premio-rango'].forEach((id) => {
+      ['filtro-rango'].forEach((id) => {
         const select = $(id);
         const actual = select.value;
         const primera = select.options[0].outerHTML;
@@ -726,7 +710,11 @@
       $('c-registrados-pct').textContent = porcentaje(registrados, estado.totalNomina) + ' de la nómina';
       $('c-asistentes').textContent = asistentes;
       $('c-asistentes-pct').textContent = porcentaje(asistentes, registrados) + ' de los registrados';
-      $('c-premios').textContent = estado.ganadores.length + ' / ' + estado.premios.length;
+      const pendientes = estado.premios.length - estado.ganadores.length;
+      $('c-ganadores').textContent = estado.ganadores.length;
+      $('c-ganadores-detalle').textContent = pendientes > 0
+        ? `${pendientes} sorteo(s) pendiente(s)`
+        : 'sorteos realizados';
 
       // Tabla por grupo: tipo de personal x rango de antigüedad
       const tipos = ['Asistencial', 'Administrativo'];
@@ -892,7 +880,7 @@
       p.fecha_asistencia = fecha;
       pintarRegistrados();
       pintarCifras();
-      pintarPremios();
+      pintarGanadores();
       aviso(nuevo ? 'Llegada registrada.' : 'Llegada retirada.');
     });
 
@@ -926,135 +914,103 @@
     });
 
     // ---------------------------------------------------------------
-    // Premios
+    // Ganadores (historial de sorteos)
     // ---------------------------------------------------------------
-    function elegibles(premio) {
-      return estado.participantes.filter((p) =>
-        p.asistio && !p.ya_gano
-        && (!premio.tipo_personal || p.tipo_personal === premio.tipo_personal)
-        && (!premio.rango_antiguedad || p.rango_id === premio.rango_antiguedad)
-      ).length;
+    function textoFiltros(pr) {
+      const tipo = pr.tipo_personal ? 'Personal ' + pr.tipo_personal.toLowerCase() : 'Todo el personal';
+      const rangos = (pr.rangos && pr.rangos.length && pr.rangos.length < estado.rangos.length)
+        ? pr.rangos.map(nombreRango).join(' · ')
+        : 'Toda antigüedad';
+      return tipo + ' · ' + rangos;
     }
 
-    function siguienteOrden() {
-      return estado.premios.reduce((max, p) => Math.max(max, p.orden || 0), 0) + 1;
+    function filasGanadores() {
+      return estado.premios.map((pr) => {
+        const g = estado.ganadores.find((x) => x.premio_id === pr.id) || null;
+        const p = g ? estado.participantes.find((x) => x.numero === g.numero) || null : null;
+        return { pr, g, p };
+      });
     }
 
-    function limpiarFormPremio() {
-      $('form-premio').reset();
-      $('premio-id').value = '';
-      $('premio-orden').value = siguienteOrden();
-      $('titulo-form-premio').textContent = 'Nuevo premio';
-      mostrar('cancelar-premio', false);
-    }
+    function pintarGanadores() {
+      const filas = filasGanadores();
+      const con = filas.filter((f) => f.g).length;
+      const pendientes = filas.length - con;
+      $('conteo-ganadores').textContent = filas.length
+        ? `${con} ${con === 1 ? 'ganador' : 'ganadores'}${pendientes ? ' · ' + pendientes + ' sorteo(s) pendiente(s)' : ''}`
+        : '';
 
-    function pintarPremios() {
-      if (!$('premio-id').value) $('premio-orden').value = siguienteOrden();
-
-      if (!estado.premios.length) {
-        $('tabla-premios').innerHTML = '<tr><td colspan="6" class="vacio">Aún no hay premios. Créelos con el formulario de arriba.</td></tr>';
+      if (!filas.length) {
+        $('tabla-ganadores').innerHTML =
+          '<tr><td colspan="7" class="vacio">Aún no se ha realizado ningún sorteo.</td></tr>';
         return;
       }
 
-      $('tabla-premios').innerHTML = estado.premios.map((pr) => {
-        const g = estado.ganadores.find((x) => x.premio_id === pr.id);
-        const ganador = g ? estado.participantes.find((p) => p.numero === g.numero) : null;
-        const para = [
-          pr.tipo_personal || 'Todos',
-          pr.rango_antiguedad ? nombreRango(pr.rango_antiguedad) : 'Toda antigüedad'
-        ].join(' · ');
-        return `<tr>
-          <td class="num">${pr.orden}</td>
-          <td>
-            <strong>${esc(pr.nombre)}</strong>
-            ${pr.descripcion ? `<div class="sub">${esc(pr.descripcion)}</div>` : ''}
-          </td>
-          <td>${esc(para)}</td>
-          <td class="num">${g ? '—' : elegibles(pr)}</td>
-          <td>
-            ${ganador
-              ? `<span class="chip gano">N.º ${ganador.numero}</span>
-                 <div class="sub">${esc(ganador.nombres)} ${esc(ganador.apellidos)}</div>`
-              : '<span class="chip no">Sin sortear</span>'}
-          </td>
-          <td>
-            <div class="acciones">
-              <button type="button" class="mini secundario" data-editar="${pr.id}">Editar</button>
-              <button type="button" class="mini peligro" data-eliminar="${pr.id}">Eliminar</button>
-            </div>
-          </td>
-        </tr>`;
-      }).join('');
+      $('tabla-ganadores').innerHTML = filas.map(({ pr, g, p }) => `<tr>
+        <td class="nowrap"><strong>${esc(pr.nombre)}</strong></td>
+        <td>${esc(textoFiltros(pr))}</td>
+        <td class="num">${g ? `<span class="chip gano">${g.numero}</span>` : '—'}</td>
+        <td>${p ? esc(p.identificacion) : ''}</td>
+        <td>
+          ${p
+            ? `${esc(p.nombres)} ${esc(p.apellidos)}
+               <div class="sub">${esc([p.cargo, p.empresa].filter(Boolean).join(' · '))}</div>`
+            : '<span class="chip no">Pendiente</span>'}
+        </td>
+        <td class="nowrap">${g ? hora(g.fecha) : ''}</td>
+        <td><button type="button" class="mini peligro" data-eliminar="${pr.id}">Eliminar</button></td>
+      </tr>`).join('');
     }
 
-    $('form-premio').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const id = $('premio-id').value;
-      const datos = {
-        nombre: $('premio-nombre').value.trim(),
-        descripcion: $('premio-descripcion').value.trim() || null,
-        orden: parseInt($('premio-orden').value, 10) || 0,
-        tipo_personal: $('premio-tipo').value || null,
-        rango_antiguedad: $('premio-rango').value ? Number($('premio-rango').value) : null
-      };
-      if (!datos.nombre) { aviso('Escriba el nombre del premio.', true); return; }
+    $('tabla-ganadores').addEventListener('click', async (e) => {
+      const boton = e.target.closest('button[data-eliminar]');
+      if (!boton) return;
+      const pr = estado.premios.find((x) => x.id === Number(boton.dataset.eliminar));
+      if (!pr) return;
+      const tieneGanador = estado.ganadores.some((g) => g.premio_id === pr.id);
+      const pregunta = tieneGanador
+        ? `¿Eliminar "${pr.nombre}" y su ganador? El ganador volverá a participar en los siguientes sorteos.`
+        : `¿Eliminar "${pr.nombre}"?`;
+      if (!confirm(pregunta)) return;
 
-      const boton = $('guardar-premio');
       boton.disabled = true;
-      const { error } = id
-        ? await db.from('premios').update(datos).eq('id', Number(id))
-        : await db.from('premios').insert(datos);
-      boton.disabled = false;
-
-      if (error) { aviso('No se pudo guardar el premio: ' + error.message, true); return; }
-      aviso(id ? 'Premio actualizado.' : 'Premio creado.');
-      $('premio-id').value = '';
-      await cargarDatos();
-      limpiarFormPremio();
+      const { error } = await db.from('premios').delete().eq('id', pr.id);
+      if (error) {
+        boton.disabled = false;
+        aviso('No se pudo eliminar: ' + error.message, true);
+        return;
+      }
+      aviso('Sorteo eliminado.');
+      cargarDatos();
     });
 
-    $('cancelar-premio').addEventListener('click', limpiarFormPremio);
+    $('exportar-ganadores').addEventListener('click', () => {
+      const filas = filasGanadores().filter((f) => f.g);
+      if (!filas.length) { aviso('Aún no hay ganadores para exportar.', true); return; }
+      if (!window.XLSX) { aviso('No se pudo cargar el componente de Excel. Revise la conexión.', true); return; }
 
-    $('tabla-premios').addEventListener('click', async (e) => {
-      const editar = e.target.closest('button[data-editar]');
-      const eliminar = e.target.closest('button[data-eliminar]');
+      const datos = filas.map(({ pr, g, p }) => ({
+        'Sorteo': pr.nombre,
+        'Filtros del sorteo': textoFiltros(pr),
+        'Número': g.numero,
+        'Identificación': p ? p.identificacion : '',
+        'Nombres': p ? p.nombres : '',
+        'Apellidos': p ? p.apellidos : '',
+        'Cargo': p ? (p.cargo || '') : '',
+        'Empresa': p ? (p.empresa || '') : '',
+        'Tipo de personal': p ? (p.tipo_personal || '') : '',
+        'Antigüedad': p ? (p.rango_nombre || '') : '',
+        'Fecha y hora del sorteo': fechaHora(g.fecha),
+        'Premio entregado': '',
+        'Firma de recibido': ''
+      }));
 
-      if (editar) {
-        const pr = estado.premios.find((x) => x.id === Number(editar.dataset.editar));
-        if (!pr) return;
-        $('premio-id').value = pr.id;
-        $('premio-nombre').value = pr.nombre;
-        $('premio-descripcion').value = pr.descripcion || '';
-        $('premio-orden').value = pr.orden;
-        $('premio-tipo').value = pr.tipo_personal || '';
-        $('premio-rango').value = pr.rango_antiguedad || '';
-        $('titulo-form-premio').textContent = 'Editar premio';
-        mostrar('cancelar-premio', true);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        $('premio-nombre').focus();
-        return;
-      }
-
-      if (eliminar) {
-        const pr = estado.premios.find((x) => x.id === Number(eliminar.dataset.eliminar));
-        if (!pr) return;
-        const tieneGanador = estado.ganadores.some((g) => g.premio_id === pr.id);
-        const pregunta = tieneGanador
-          ? `"${pr.nombre}" ya tiene ganador. Si lo elimina también se borra el ganador. ¿Continuar?`
-          : `¿Eliminar el premio "${pr.nombre}"?`;
-        if (!confirm(pregunta)) return;
-
-        eliminar.disabled = true;
-        const { error } = await db.from('premios').delete().eq('id', pr.id);
-        if (error) {
-          eliminar.disabled = false;
-          aviso('No se pudo eliminar: ' + error.message, true);
-          return;
-        }
-        if ($('premio-id').value === String(pr.id)) limpiarFormPremio();
-        aviso('Premio eliminado.');
-        cargarDatos();
-      }
+      const hoja = XLSX.utils.json_to_sheet(datos);
+      hoja['!cols'] = [12, 46, 8, 14, 22, 24, 26, 40, 16, 26, 20, 28, 28].map((w) => ({ wch: w }));
+      const libro = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(libro, hoja, 'Ganadores');
+      const hoy = aInputLocal(new Date()).slice(0, 10);
+      XLSX.writeFile(libro, `acta-ganadores-fiesta-${hoy}.xlsx`);
     });
 
     // ---------------------------------------------------------------
