@@ -4,6 +4,7 @@
      Ruta en el repositorio: admin.html
      Uso: solo usuarios con rol "admin"
      Secciones: Resumen, Registrados, Ganadores, Usuarios
+     Imágenes: img/logo-clinica.png, img/logo-centro.png
      ===================================================================== -->
 <html lang="es">
 <head>
@@ -12,25 +13,28 @@
   <title>Panel - Fiesta fin de año 2026</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --fondo: #0f1d33;
-      --fondo-2: #16294a;
-      --pagina: #f3f5f9;
+      /* Colores institucionales */
+      --azul: #195BA7;
+      --azul-oscuro: #0F3F7A;
+      --rojo: #E51C21;
+      --rojo-oscuro: #B8141A;
+      --celeste: #6ECAF0;
+      --gris: #BBBCBF;
+
+      --pagina: #EEF4FB;
       --tarjeta: #ffffff;
-      --texto: #1b2433;
-      --texto-suave: #5b6576;
-      --borde: #dfe3ea;
-      --dorado: #d9a441;
-      --dorado-oscuro: #a8761c;
-      --verde: #1e7a46;
-      --verde-fondo: #e6f4ec;
-      --ambar: #8a5a00;
-      --ambar-fondo: #fff4dc;
-      --rojo: #b3261e;
-      --rojo-fondo: #fdecea;
-      --radio: 14px;
+      --texto: #1B2433;
+      --texto-suave: #5B6576;
+      --borde: #D8E0EA;
+      --verde: #1E7A46;
+      --verde-fondo: #E6F4EC;
+      --ambar: #8A5A00;
+      --ambar-fondo: #FFF4DC;
+      --rojo-fondo: #FDECEC;
+      --radio: 16px;
     }
 
     * { box-sizing: border-box; }
@@ -42,44 +46,59 @@
       background: var(--pagina);
     }
 
-    /* ---------- Encabezado ---------- */
-    header.barra {
-      background: linear-gradient(160deg, var(--fondo) 0%, var(--fondo-2) 100%);
-      color: #fff;
-      padding: 16px 16px 0;
-    }
+    /* ---------- Encabezado con logos ---------- */
+    header.barra { background: #fff; box-shadow: 0 4px 18px rgba(15,63,122,.08); }
     .barra-interna {
       max-width: 1100px;
       margin: 0 auto;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 12px 20px;
       flex-wrap: wrap;
-      padding-bottom: 14px;
+      padding: 10px 16px;
     }
+    .marca { display: flex; align-items: center; gap: 16px; min-width: 0; }
+    .marca .logo { display: block; height: 44px; width: auto; }
+    .marca .logo.centro { height: 38px; }
+    .marca .titulo-panel { padding-left: 16px; border-left: 2px solid var(--borde); }
     .marca small {
       display: block;
-      color: var(--dorado);
+      color: var(--rojo);
       font-size: 11px;
+      font-weight: 600;
       letter-spacing: .14em;
       text-transform: uppercase;
       margin-bottom: 2px;
     }
-    .marca strong { font-family: 'Fraunces', Georgia, serif; font-size: 22px; font-weight: 800; }
-    .usuario { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; color: #c9d2e3; }
-    .usuario button { background: transparent; color: var(--dorado); border: 1px solid rgba(217,164,65,.5); }
+    .marca strong { font-family: 'Poppins', 'Inter', sans-serif; font-size: 20px; font-weight: 800; color: var(--azul-oscuro); }
+    @media (max-width: 720px) {
+      .marca .logo.centro { display: none; }
+    }
+    @media (max-width: 480px) {
+      .marca .titulo-panel { display: none; }
+    }
+    .usuario { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--texto-suave); }
+    .usuario button { background: #fff; color: var(--azul); border: 1.5px solid var(--borde); }
+    .usuario button:hover { border-color: var(--azul); }
+    @media (max-width: 1440px) { #correo-usuario { display: none; } }
     a.enlace-menu {
-      color: #c9d2e3;
+      color: var(--azul);
       text-decoration: none;
       font-weight: 600;
       font-size: 13px;
       padding: 6px 10px;
       border-radius: 10px;
-      border: 1px solid rgba(255,255,255,.18);
+      border: 1.5px solid var(--borde);
     }
-    a.enlace-menu:hover { color: #fff; border-color: rgba(255,255,255,.4); }
+    a.enlace-menu:hover { border-color: var(--azul); }
 
+    /* ---------- Pestañas (banda azul) ---------- */
+    .banda-pestanas {
+      background: linear-gradient(90deg, var(--azul-oscuro) 0%, var(--azul) 100%);
+      border-top: 4px solid var(--rojo);
+      padding: 8px 16px 0;
+    }
     nav.pestanas {
       max-width: 1100px;
       margin: 0 auto;
@@ -89,13 +108,13 @@
     }
     nav.pestanas button {
       background: transparent;
-      color: #c9d2e3;
-      border-radius: 10px 10px 0 0;
-      padding: 10px 16px;
+      color: #D6E6F7;
+      border-radius: 12px 12px 0 0;
+      padding: 10px 18px;
       white-space: nowrap;
     }
-    nav.pestanas button:hover { color: #fff; }
-    nav.pestanas button.activa { background: var(--pagina); color: var(--texto); }
+    nav.pestanas button:hover { color: #fff; background: rgba(255,255,255,.08); }
+    nav.pestanas button.activa { background: var(--pagina); color: var(--azul-oscuro); }
 
     main { max-width: 1100px; margin: 0 auto; padding: 20px 16px 48px; }
 
@@ -106,8 +125,9 @@
       border-radius: var(--radio);
       padding: 20px;
       margin-bottom: 16px;
+      box-shadow: 0 8px 22px rgba(15,63,122,.06);
     }
-    h2 { font-size: 17px; margin: 0 0 6px; }
+    h2 { font-family: 'Poppins', 'Inter', sans-serif; font-size: 17px; font-weight: 700; margin: 0 0 6px; color: var(--azul-oscuro); }
     .ayuda { color: var(--texto-suave); font-size: 13px; line-height: 1.5; margin: 0 0 14px; }
 
     .cifras {
@@ -119,23 +139,29 @@
     .cifra {
       background: var(--tarjeta);
       border: 1px solid var(--borde);
+      border-top: 4px solid var(--azul);
       border-radius: var(--radio);
       padding: 16px 18px;
+      box-shadow: 0 8px 22px rgba(15,63,122,.06);
     }
+    .cifra:nth-child(4) { border-top-color: var(--rojo); }
+    .cifra:nth-child(4) strong { color: var(--rojo); }
     .cifra span {
       font-size: 12px;
-      color: var(--texto-suave);
+      font-weight: 600;
+      color: var(--azul);
       text-transform: uppercase;
       letter-spacing: .08em;
     }
     .cifra strong {
       display: block;
-      font-family: 'Fraunces', Georgia, serif;
+      font-family: 'Poppins', 'Inter', sans-serif;
       font-weight: 700;
       font-size: 34px;
       line-height: 1.15;
       margin: 6px 0 2px;
       font-variant-numeric: tabular-nums;
+      color: var(--azul-oscuro);
     }
     .cifra small { color: var(--texto-suave); font-size: 13px; }
 
@@ -149,13 +175,14 @@
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: .06em;
-      color: var(--texto-suave);
+      color: var(--azul);
       white-space: nowrap;
     }
     th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; }
     tfoot td { font-weight: 600; border-bottom: none; }
     td .sub { color: var(--texto-suave); font-size: 12.5px; margin-top: 2px; }
     td.nowrap { white-space: nowrap; }
+    td button.mini { white-space: nowrap; }
     td.vacio { text-align: center; color: var(--texto-suave); padding: 28px 8px; }
 
     label.campo { display: block; font-weight: 600; font-size: 13px; margin-bottom: 6px; }
@@ -170,7 +197,7 @@
       color: inherit;
       outline: none;
     }
-    input:focus, select:focus, textarea:focus { border-color: var(--dorado); }
+    input:focus, select:focus, textarea:focus { border-color: var(--azul); box-shadow: 0 0 0 4px rgba(110,202,240,.3); }
 
     .rejilla {
       display: grid;
@@ -186,14 +213,16 @@
       padding: 10px 16px;
       border: none;
       border-radius: 10px;
-      background: var(--dorado);
-      color: #1b1406;
+      background: var(--azul);
+      color: #fff;
       cursor: pointer;
     }
-    button:hover { filter: brightness(1.05); }
+    button:hover { background: var(--azul-oscuro); }
     button:disabled { opacity: .6; cursor: wait; }
-    button.secundario { background: #fff; color: var(--texto); border: 1.5px solid var(--borde); }
-    button.peligro { background: #fff; color: var(--rojo); border: 1.5px solid #f1c4c0; }
+    button.secundario { background: #fff; color: var(--azul); border: 1.5px solid var(--borde); }
+    button.secundario:hover { background: #F3F7FC; border-color: var(--azul); }
+    button.peligro { background: #fff; color: var(--rojo); border: 1.5px solid #F3C2C3; }
+    button.peligro:hover { background: var(--rojo-fondo); border-color: var(--rojo); }
     button.mini { padding: 6px 10px; font-size: 13px; }
 
     .acciones { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -211,8 +240,8 @@
       white-space: nowrap;
     }
     .chip.si { background: var(--verde-fondo); color: var(--verde); }
-    .chip.no { background: #eef1f6; color: var(--texto-suave); }
-    .chip.gano { background: var(--ambar-fondo); color: var(--ambar); }
+    .chip.no { background: #EEF2F7; color: var(--texto-suave); }
+    .chip.gano { background: var(--rojo-fondo); color: var(--rojo-oscuro); }
 
     .estado-registro {
       display: inline-block;
@@ -223,17 +252,17 @@
       margin-bottom: 14px;
     }
     .estado-registro.abierto { background: var(--verde-fondo); color: var(--verde); }
-    .estado-registro.cerrado { background: #eef1f6; color: var(--texto-suave); }
+    .estado-registro.cerrado { background: #EEF2F7; color: var(--texto-suave); }
     .estado-registro.pendiente { background: var(--ambar-fondo); color: var(--ambar); }
 
-    .login { max-width: 400px; margin: 40px auto; }
+    .login { max-width: 400px; margin: 40px auto; border-top: 5px solid var(--rojo); }
     .mensaje {
       margin-top: 12px;
       padding: 12px 14px;
       border-radius: 10px;
       font-size: 14px;
       background: var(--rojo-fondo);
-      color: var(--rojo);
+      color: var(--rojo-oscuro);
     }
 
     .aviso {
@@ -242,7 +271,7 @@
       bottom: 20px;
       transform: translateX(-50%);
       max-width: calc(100% - 32px);
-      background: var(--texto);
+      background: var(--azul-oscuro);
       color: #fff;
       padding: 12px 18px;
       border-radius: 10px;
@@ -259,8 +288,12 @@
   <header class="barra">
     <div class="barra-interna">
       <div class="marca">
-        <small>Panel de administración</small>
-        <strong id="titulo-evento">Fiesta fin de año 2026</strong>
+        <img src="img/logo-clinica.png" alt="Clínica Pabón" class="logo">
+        <img src="img/logo-centro.png" alt="Centro de Cuidados Cardioneurovasculares Pabón S.A.S." class="logo centro">
+        <div class="titulo-panel">
+          <small>Panel de administración</small>
+          <strong id="titulo-evento">Fiesta fin de año 2026</strong>
+        </div>
       </div>
       <div class="usuario">
         <a class="enlace-menu" href="menu.html">← Menú</a>
@@ -271,12 +304,14 @@
         </span>
       </div>
     </div>
-    <nav class="pestanas oculto" id="pestanas">
-      <button type="button" data-tab="resumen" class="activa">Resumen</button>
-      <button type="button" data-tab="registrados">Registrados</button>
-      <button type="button" data-tab="ganadores">Ganadores</button>
-      <button type="button" data-tab="usuarios">Usuarios</button>
-    </nav>
+    <div class="banda-pestanas">
+      <nav class="pestanas oculto" id="pestanas">
+        <button type="button" data-tab="resumen" class="activa">Resumen</button>
+        <button type="button" data-tab="registrados">Registrados</button>
+        <button type="button" data-tab="ganadores">Ganadores</button>
+        <button type="button" data-tab="usuarios">Usuarios</button>
+      </nav>
+    </div>
   </header>
 
   <main>
