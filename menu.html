@@ -116,6 +116,7 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 16px;
     }
+    .modulo.ancho { grid-column: 1 / -1; }
     @media (max-width: 640px) {
       .modulos { grid-template-columns: 1fr; }
     }
@@ -283,6 +284,22 @@
           </div>
         </div>
         <p>Pantalla del sorteo en vivo: se eligen tipo de personal y antigüedad, y participan solo los asistentes.</p>
+        <span class="ir">Abrir →</span>
+      </a>
+
+      <a class="modulo ancho" href="nomina.html">
+        <div class="cabeza">
+          <span class="icono" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <ellipse cx="12" cy="5.5" rx="7" ry="2.5"/><path d="M5 5.5v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-6"/><path d="M5 11.5v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-6"/>
+            </svg>
+          </span>
+          <div>
+            <h2>Gestión de nómina</h2>
+            <div class="quien">Administradores</div>
+          </div>
+        </div>
+        <p>Cargar la nómina desde el Excel de Talento Humano (reemplazar o actualizar) y borrar los registros y sorteos de prueba.</p>
         <span class="ir">Abrir →</span>
       </a>
     </nav>

@@ -1,0 +1,858 @@
+<!doctype html>
+<!-- =====================================================================
+     Fiesta fin de año 2026 - Gestión de nómina
+     Ruta en el repositorio: nomina.html
+     Uso: solo usuarios con rol "admin"
+     - Estado de la base de datos
+     - Cargar la nómina desde Excel (.xlsx) o CSV, con revisión previa
+       (reemplazar todo, o agregar/actualizar)
+     - Borrar registros y sorteos conservando la nómina
+     Requiere sql/09_gestion_nomina.sql
+     Imágenes: img/logo-clinica.png, img/logo-centro.png
+     ===================================================================== -->
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nómina - Fiesta fin de año 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Colores institucionales */
+      --azul: #195BA7;
+      --azul-oscuro: #0F3F7A;
+      --rojo: #E51C21;
+      --rojo-oscuro: #B8141A;
+      --celeste: #6ECAF0;
+
+      --pagina: #EEF4FB;
+      --tarjeta: #ffffff;
+      --texto: #1B2433;
+      --texto-suave: #5B6576;
+      --borde: #D8E0EA;
+      --verde: #1E7A46;
+      --verde-fondo: #E6F4EC;
+      --ambar: #8A5A00;
+      --ambar-fondo: #FFF4DC;
+      --rojo-fondo: #FDECEC;
+      --radio: 16px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      color: var(--texto);
+      background: var(--pagina);
+    }
+
+    /* ---------- Encabezado con logos ---------- */
+    header.barra { background: #fff; box-shadow: 0 4px 18px rgba(15,63,122,.08); }
+    .barra-interna {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px 20px;
+      flex-wrap: wrap;
+      padding: 10px 16px;
+    }
+    .marca { display: flex; align-items: center; gap: 16px; min-width: 0; }
+    .marca .logo { display: block; height: 44px; width: auto; }
+    .marca .logo.centro { height: 38px; }
+    .marca .titulo-panel { padding-left: 16px; border-left: 2px solid var(--borde); }
+    .marca small {
+      display: block;
+      color: var(--rojo);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    .marca strong { font-family: 'Poppins', 'Inter', sans-serif; font-size: 20px; font-weight: 800; color: var(--azul-oscuro); }
+    @media (max-width: 720px) { .marca .logo.centro { display: none; } }
+    @media (max-width: 480px) { .marca .titulo-panel { display: none; } }
+    .usuario { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--texto-suave); }
+    .usuario button { background: #fff; color: var(--azul); border: 1.5px solid var(--borde); }
+    .usuario button:hover { background: #fff; border-color: var(--azul); }
+    @media (max-width: 1440px) { #correo-usuario { display: none; } }
+    a.enlace-menu {
+      color: var(--azul);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 6px 10px;
+      border-radius: 10px;
+      border: 1.5px solid var(--borde);
+    }
+    a.enlace-menu:hover { border-color: var(--azul); }
+    .banda {
+      height: 12px;
+      background: linear-gradient(90deg, var(--azul-oscuro) 0%, var(--azul) 100%);
+      border-top: 4px solid var(--rojo);
+    }
+
+    main { max-width: 1100px; margin: 0 auto; padding: 20px 16px 48px; }
+
+    /* ---------- Componentes ---------- */
+    .tarjeta {
+      background: var(--tarjeta);
+      border: 1px solid var(--borde);
+      border-radius: var(--radio);
+      padding: 22px;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 22px rgba(15,63,122,.06);
+    }
+    .tarjeta.peligro { border-top: 4px solid var(--rojo); }
+    h2 { font-family: 'Poppins', 'Inter', sans-serif; font-size: 18px; font-weight: 700; margin: 0 0 6px; color: var(--azul-oscuro); }
+    h3 { font-size: 15px; margin: 18px 0 8px; color: var(--azul-oscuro); }
+    .ayuda { color: var(--texto-suave); font-size: 13.5px; line-height: 1.55; margin: 0 0 14px; }
+    .paso {
+      display: inline-grid;
+      place-items: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--azul);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      margin-right: 8px;
+      vertical-align: 2px;
+    }
+
+    .cifras {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .cifra { border: 1px solid var(--borde); border-top: 4px solid var(--azul); border-radius: 14px; padding: 14px 16px; }
+    .cifra span { font-size: 12px; font-weight: 600; color: var(--azul); text-transform: uppercase; letter-spacing: .08em; }
+    .cifra strong {
+      display: block;
+      font-family: 'Poppins', 'Inter', sans-serif;
+      font-size: 30px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--azul-oscuro);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .tabla-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+    .tabla-scroll table { min-width: 640px; }
+    th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--borde); vertical-align: top; }
+    th { font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--azul); white-space: nowrap; }
+    th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    tfoot td { font-weight: 600; border-bottom: none; }
+
+    button {
+      font: inherit;
+      font-weight: 600;
+      font-size: 14px;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 10px;
+      background: var(--azul);
+      color: #fff;
+      cursor: pointer;
+    }
+    button:hover:not(:disabled) { background: var(--azul-oscuro); }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    button.secundario { background: #fff; color: var(--azul); border: 1.5px solid var(--borde); }
+    button.secundario:hover:not(:disabled) { background: #F3F7FC; border-color: var(--azul); }
+    button.rojo { background: var(--rojo); }
+    button.rojo:hover:not(:disabled) { background: var(--rojo-oscuro); }
+
+    input[type="text"], input[type="email"], input[type="password"] {
+      font: inherit;
+      font-size: 15px;
+      padding: 10px 12px;
+      border: 1.5px solid var(--borde);
+      border-radius: 10px;
+      outline: none;
+      width: 100%;
+    }
+    input:focus { border-color: var(--azul); box-shadow: 0 0 0 4px rgba(110,202,240,.3); }
+    label.campo { display: block; font-weight: 600; font-size: 13px; margin-bottom: 6px; }
+
+    .zona-archivo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 18px;
+      border: 2px dashed var(--celeste);
+      border-radius: 14px;
+      background: #F7FBFE;
+    }
+    .zona-archivo input[type="file"] { font: inherit; font-size: 14px; flex: 1 1 260px; }
+    .acciones { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+    .resumen-archivo { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0 4px; }
+    .chip { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+    .chip.ok { background: var(--verde-fondo); color: var(--verde); }
+    .chip.error { background: var(--rojo-fondo); color: var(--rojo-oscuro); }
+    .chip.aviso { background: var(--ambar-fondo); color: var(--ambar); }
+    .chip.info { background: rgba(110,202,240,.22); color: var(--azul-oscuro); }
+
+    .problemas { max-height: 280px; overflow-y: auto; border: 1px solid var(--borde); border-radius: 12px; }
+    .problemas table { min-width: 0; }
+    .problemas td.tipo-error { color: var(--rojo-oscuro); font-weight: 600; white-space: nowrap; }
+    .problemas td.tipo-aviso { color: var(--ambar); font-weight: 600; white-space: nowrap; }
+
+    .modos { display: grid; gap: 10px; margin: 8px 0 14px; }
+    .modo {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 14px 16px;
+      border: 1.5px solid var(--borde);
+      border-radius: 14px;
+      cursor: pointer;
+    }
+    .modo input { margin-top: 3px; width: 18px; height: 18px; accent-color: var(--azul); flex-shrink: 0; }
+    .modo strong { display: block; font-size: 14.5px; color: var(--azul-oscuro); }
+    .modo span { font-size: 13px; color: var(--texto-suave); line-height: 1.5; }
+    .modo:has(input:checked) { border-color: var(--azul); background: #F3F8FD; }
+    .modo.destructivo:has(input:checked) { border-color: var(--rojo); background: #FFF6F6; }
+
+    .confirmar-borrado { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+    .confirmar-borrado input { width: 160px; text-transform: uppercase; letter-spacing: .1em; font-weight: 600; }
+    .confirmar-borrado label { font-size: 13.5px; color: var(--rojo-oscuro); font-weight: 600; }
+
+    .mensaje { margin-top: 12px; padding: 12px 14px; border-radius: 10px; font-size: 14px; background: var(--rojo-fondo); color: var(--rojo-oscuro); }
+    .resultado-ok { margin-top: 14px; padding: 14px 16px; border-radius: 12px; background: var(--verde-fondo); color: var(--verde); font-size: 14px; font-weight: 600; }
+
+    .login { max-width: 400px; margin: 40px auto; border-top: 5px solid var(--rojo); }
+
+    .aviso {
+      position: fixed;
+      left: 50%;
+      bottom: 20px;
+      transform: translateX(-50%);
+      max-width: calc(100% - 32px);
+      background: var(--azul-oscuro);
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      z-index: 10;
+    }
+    .aviso.error { background: var(--rojo); }
+
+    .oculto { display: none !important; }
+  </style>
+</head>
+<body>
+  <header class="barra">
+    <div class="barra-interna">
+      <div class="marca">
+        <img src="img/logo-clinica.png" alt="Clínica Pabón" class="logo">
+        <img src="img/logo-centro.png" alt="Centro de Cuidados Cardioneurovasculares Pabón S.A.S." class="logo centro">
+        <div class="titulo-panel">
+          <small>Gestión de nómina</small>
+          <strong id="titulo-evento">Fiesta fin de año 2026</strong>
+        </div>
+      </div>
+      <div class="usuario">
+        <a class="enlace-menu" href="menu.html">← Menú</a>
+        <span class="usuario oculto" id="zona-usuario">
+          <span id="correo-usuario"></span>
+          <button type="button" class="mini" id="salir">Cerrar sesión</button>
+        </span>
+      </div>
+    </div>
+    <div class="banda"></div>
+  </header>
+
+  <main>
+    <!-- ================= Inicio de sesión ================= -->
+    <section class="tarjeta login" id="vista-login">
+      <h2>Iniciar sesión</h2>
+      <p class="ayuda">Acceso exclusivo para administradores.</p>
+      <form id="form-login" novalidate>
+        <label class="campo" for="correo">Correo</label>
+        <input type="email" id="correo" autocomplete="username" required>
+        <div style="height:12px"></div>
+        <label class="campo" for="clave">Contraseña</label>
+        <input type="password" id="clave" autocomplete="current-password" required>
+        <div style="height:16px"></div>
+        <button type="submit" id="boton-login" style="width:100%">Entrar</button>
+        <div class="mensaje oculto" id="mensaje-login" role="alert"></div>
+      </form>
+    </section>
+
+    <div class="oculto" id="vista-modulo">
+      <!-- ================= Estado ================= -->
+      <section class="tarjeta">
+        <div class="acciones" style="justify-content:space-between; margin-bottom:12px">
+          <h2 style="margin:0">Estado actual de la base de datos</h2>
+          <button type="button" class="secundario" id="actualizar">Actualizar</button>
+        </div>
+        <div class="cifras">
+          <div class="cifra"><span>Nómina</span><strong id="c-nomina">0</strong></div>
+          <div class="cifra"><span>Registrados</span><strong id="c-registros">0</strong></div>
+          <div class="cifra"><span>Asistentes</span><strong id="c-asistentes">0</strong></div>
+          <div class="cifra"><span>Sorteos</span><strong id="c-sorteos">0</strong></div>
+        </div>
+      </section>
+
+      <!-- ================= Cargar nómina ================= -->
+      <section class="tarjeta">
+        <h2>Cargar nómina</h2>
+        <p class="ayuda">
+          Use el archivo de Talento Humano en Excel (.xlsx) o CSV, con las columnas:
+          <strong>identificacion, nombres, apellidos, fecha_vinculacion, cargo, empresa, tipo_personal</strong>
+          (tipo_personal: <em>Asistencial</em> o <em>Administrativo</em>). Si no tiene el formato, descargue la plantilla.
+        </p>
+
+        <h3><span class="paso">1</span>Seleccione el archivo</h3>
+        <div class="zona-archivo">
+          <input type="file" id="archivo" accept=".xlsx,.xls,.csv,.txt">
+          <button type="button" class="secundario" id="plantilla">Descargar plantilla Excel</button>
+        </div>
+
+        <div class="oculto" id="revision">
+          <h3><span class="paso">2</span>Revisión del archivo</h3>
+          <div class="resumen-archivo" id="resumen-archivo"></div>
+
+          <div class="oculto" id="caja-problemas">
+            <p class="ayuda" style="margin:10px 0 8px" id="texto-problemas"></p>
+            <div class="problemas">
+              <table>
+                <thead><tr><th>Fila</th><th>Identificación</th><th>Tipo</th><th>Detalle</th></tr></thead>
+                <tbody id="tabla-problemas"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="oculto" id="caja-grupos">
+            <p class="ayuda" style="margin:14px 0 8px">Colaboradores por empresa, tipo de personal y antigüedad. Revíselo con Talento Humano antes de cargar.</p>
+            <div class="tabla-scroll">
+              <table>
+                <thead id="cabeza-grupos"></thead>
+                <tbody id="tabla-grupos"></tbody>
+                <tfoot id="pie-grupos"></tfoot>
+              </table>
+            </div>
+          </div>
+
+          <div class="oculto" id="caja-carga">
+            <h3><span class="paso">3</span>¿Cómo desea cargarla?</h3>
+            <div class="modos">
+              <label class="modo destructivo">
+                <input type="radio" name="modo" value="reemplazar">
+                <div>
+                  <strong>Reemplazar toda la nómina</strong>
+                  <span>Borra la nómina actual, <b>todos los registros</b> (números y códigos QR), sorteos y ganadores, y carga la nueva.
+                  Los números vuelven a empezar en 1. Úsela para la carga inicial o para borrar los datos de prueba.</span>
+                </div>
+              </label>
+              <label class="modo">
+                <input type="radio" name="modo" value="actualizar">
+                <div>
+                  <strong>Agregar o actualizar colaboradores</strong>
+                  <span>No borra nada: agrega a los colaboradores nuevos y actualiza los datos de los que ya existen.
+                  Los registros, números y QR se conservan. Úsela si Talento Humano envía ingresos nuevos o correcciones.</span>
+                </div>
+              </label>
+            </div>
+
+            <div class="confirmar-borrado oculto" id="confirmar-reemplazo">
+              <label for="texto-reemplazo">Para confirmar, escriba BORRAR:</label>
+              <input type="text" id="texto-reemplazo" autocomplete="off" spellcheck="false">
+            </div>
+
+            <button type="button" id="cargar" disabled>Cargar nómina</button>
+            <div class="resultado-ok oculto" id="resultado-carga" role="status"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= Limpiar registros ================= -->
+      <section class="tarjeta peligro">
+        <h2>Borrar registros y sorteos</h2>
+        <p class="ayuda">
+          Conserva la nómina y borra <b>todos los registros</b> (números y códigos QR), la asistencia, los sorteos y los ganadores.
+          Los números vuelven a empezar en 1. Úselo, por ejemplo, después de un ensayo y antes de abrir el registro real.
+          <b>No se puede deshacer.</b>
+        </p>
+        <div class="confirmar-borrado">
+          <label for="texto-limpiar">Para confirmar, escriba BORRAR:</label>
+          <input type="text" id="texto-limpiar" autocomplete="off" spellcheck="false">
+          <button type="button" class="rojo" id="limpiar" disabled>Borrar registros y sorteos</button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div class="aviso oculto" id="aviso" role="status"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="js/config.js"></script>
+  <script>
+    const cfg = window.APP_CONFIG;
+    const db = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_KEY);
+    const $ = (id) => document.getElementById(id);
+
+    const COLUMNAS = ['identificacion', 'nombres', 'apellidos', 'fecha_vinculacion', 'cargo', 'empresa', 'tipo_personal'];
+    const OBLIGATORIAS = ['identificacion', 'nombres', 'apellidos', 'empresa'];
+    // Nombres de columna aceptados (sin tildes, en minúscula)
+    const ALIAS = {
+      identificacion: ['identificacion', 'cedula', 'documento', 'numero_de_identificacion', 'numero_identificacion',
+                       'no_identificacion', 'n_identificacion', 'numero_de_documento', 'numero_documento', 'cc', 'id'],
+      nombres: ['nombres', 'nombre'],
+      apellidos: ['apellidos', 'apellido'],
+      fecha_vinculacion: ['fecha_vinculacion', 'fecha_de_vinculacion', 'fecha_ingreso', 'fecha_de_ingreso', 'vinculacion'],
+      cargo: ['cargo'],
+      empresa: ['empresa', 'razon_social'],
+      tipo_personal: ['tipo_personal', 'tipo_de_personal', 'tipo', 'personal']
+    };
+
+    const estado = { rangos: [], fechaCorte: null, filas: [], errores: 0, sesion: false };
+
+    $('titulo-evento').textContent = cfg.EVENTO_NOMBRE;
+
+    // ---------------------------------------------------------------
+    // Utilidades
+    // ---------------------------------------------------------------
+    function esc(v) {
+      return String(v ?? '').replace(/[&<>"']/g, (c) => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+      ));
+    }
+    function mostrar(id, visible) { $(id).classList.toggle('oculto', !visible); }
+    let temporizadorAviso = null;
+    function aviso(texto, esError) {
+      const caja = $('aviso');
+      caja.textContent = texto;
+      caja.className = 'aviso' + (esError ? ' error' : '');
+      clearTimeout(temporizadorAviso);
+      temporizadorAviso = setTimeout(() => caja.classList.add('oculto'), 5000);
+    }
+    function clave(texto) {
+      return String(texto ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+    }
+    function limpiarTexto(v) { return String(v ?? '').replace(/\s+/g, ' ').trim(); }
+    function dos(n) { return String(n).padStart(2, '0'); }
+
+    // ---------------------------------------------------------------
+    // Sesión
+    // ---------------------------------------------------------------
+    function vistaLogin(textoError) {
+      estado.sesion = false;
+      mostrar('zona-usuario', false);
+      mostrar('vista-modulo', false);
+      mostrar('vista-login', true);
+      $('mensaje-login').textContent = textoError || '';
+      mostrar('mensaje-login', !!textoError);
+    }
+
+    async function verificarSesion() {
+      const { data: { session } } = await db.auth.getSession();
+      if (!session) { vistaLogin(); return; }
+      const { data: rol, error } = await db.rpc('mi_rol');
+      if (error || rol !== 'admin') {
+        vistaLogin('Solo los administradores pueden gestionar la nómina.');
+        return;
+      }
+      estado.sesion = true;
+      $('correo-usuario').textContent = session.user.email;
+      mostrar('vista-login', false);
+      mostrar('zona-usuario', true);
+      mostrar('vista-modulo', true);
+      await cargarEstado();
+    }
+
+    $('form-login').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      mostrar('mensaje-login', false);
+      const boton = $('boton-login');
+      boton.disabled = true;
+      boton.textContent = 'Entrando...';
+      const { error } = await db.auth.signInWithPassword({ email: $('correo').value.trim(), password: $('clave').value });
+      boton.disabled = false;
+      boton.textContent = 'Entrar';
+      if (error) {
+        vistaLogin((error.message || '').toLowerCase().includes('invalid login credentials')
+          ? 'Correo o contraseña incorrectos.'
+          : 'Error al iniciar sesión: ' + error.message);
+        return;
+      }
+      $('clave').value = '';
+      verificarSesion();
+    });
+
+    $('salir').addEventListener('click', async () => { await db.auth.signOut(); vistaLogin(); });
+
+    // ---------------------------------------------------------------
+    // Estado de la base
+    // ---------------------------------------------------------------
+    async function contar(tabla, filtro) {
+      let consulta = db.from(tabla).select('*', { count: 'exact', head: true });
+      if (filtro) consulta = consulta.eq(filtro[0], filtro[1]);
+      const { count, error } = await consulta;
+      if (error) throw error;
+      return count || 0;
+    }
+
+    async function cargarEstado() {
+      const boton = $('actualizar');
+      boton.disabled = true;
+      try {
+        const [nomina, registros, asistentes, sorteos, rangos, evento] = await Promise.all([
+          contar('nomina'),
+          contar('registros'),
+          contar('registros', ['asistio', true]),
+          contar('premios'),
+          db.from('rangos_antiguedad').select('*').order('id'),
+          db.from('evento').select('fecha_corte_antiguedad').eq('id', 1).single()
+        ]);
+        if (rangos.error) throw rangos.error;
+        if (evento.error) throw evento.error;
+        $('c-nomina').textContent = nomina;
+        $('c-registros').textContent = registros;
+        $('c-asistentes').textContent = asistentes;
+        $('c-sorteos').textContent = sorteos;
+        estado.rangos = rangos.data;
+        estado.fechaCorte = evento.data.fecha_corte_antiguedad;
+      } catch (err) {
+        console.error(err);
+        aviso('No se pudo consultar la base: ' + (err.message || err), true);
+      } finally {
+        boton.disabled = false;
+      }
+    }
+
+    $('actualizar').addEventListener('click', cargarEstado);
+
+    // ---------------------------------------------------------------
+    // Plantilla
+    // ---------------------------------------------------------------
+    $('plantilla').addEventListener('click', () => {
+      if (!window.XLSX) { aviso('No se pudo cargar el componente de Excel. Revise la conexión.', true); return; }
+      const hoja = XLSX.utils.aoa_to_sheet([COLUMNAS]);
+      hoja['!cols'] = [16, 24, 26, 18, 30, 44, 16].map((w) => ({ wch: w }));
+      const instrucciones = XLSX.utils.aoa_to_sheet([
+        ['Columna', 'Obligatoria', 'Formato'],
+        ['identificacion', 'Sí', 'Número de documento, sin puntos ni espacios'],
+        ['nombres', 'Sí', 'Nombres del colaborador'],
+        ['apellidos', 'Sí', 'Los dos apellidos, primero el primer apellido'],
+        ['fecha_vinculacion', 'Recomendada', 'Fecha (formato fecha de Excel o AAAA-MM-DD o DD/MM/AAAA)'],
+        ['cargo', 'No', 'Cargo'],
+        ['empresa', 'Sí', 'Escrita siempre igual para la misma empresa'],
+        ['tipo_personal', 'Recomendada', 'Asistencial o Administrativo']
+      ]);
+      instrucciones['!cols'] = [{ wch: 18 }, { wch: 13 }, { wch: 60 }];
+      const libro = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(libro, hoja, 'Nomina');
+      XLSX.utils.book_append_sheet(libro, instrucciones, 'Instrucciones');
+      XLSX.writeFile(libro, 'plantilla-nomina-fiesta.xlsx');
+    });
+
+    // ---------------------------------------------------------------
+    // Lectura y revisión del archivo
+    // ---------------------------------------------------------------
+    async function leerFilas(archivo) {
+      const datos = await archivo.arrayBuffer();
+      let libro;
+      if (/\.(csv|txt)$/i.test(archivo.name)) {
+        // CSV: UTF-8, y si no, Windows-1252 (CSV guardado por Excel en español)
+        let texto;
+        try { texto = new TextDecoder('utf-8', { fatal: true }).decode(datos); }
+        catch (e) { texto = new TextDecoder('windows-1252').decode(datos); }
+        texto = texto.replace(/^﻿/, '');
+        const primera = texto.split(/\r?\n/)[0] || '';
+        const separador = (primera.split(';').length > primera.split(',').length) ? ';' : ',';
+        libro = XLSX.read(texto, { type: 'string', raw: true, FS: separador });
+      } else {
+        libro = XLSX.read(datos, { type: 'array' });
+      }
+      const hoja = libro.Sheets[libro.SheetNames[0]];
+      return XLSX.utils.sheet_to_json(hoja, { header: 1, raw: true, defval: '', blankrows: false });
+    }
+
+    function convertirFecha(valor) {
+      if (valor === '' || valor === null || valor === undefined) return { valor: null };
+      let y, m, d;
+      if (typeof valor === 'number') {
+        const p = XLSX.SSF.parse_date_code(valor);
+        if (!p || !p.y) return { error: true };
+        y = p.y; m = p.m; d = p.d;
+      } else {
+        const s = String(valor).trim();
+        let r;
+        if ((r = s.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/))) { y = +r[1]; m = +r[2]; d = +r[3]; }
+        else if ((r = s.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})/))) { d = +r[1]; m = +r[2]; y = +r[3]; }  // día/mes/año
+        else if (/^\d{5}(\.\d+)?$/.test(s)) return convertirFecha(Number(s));                         // número de fecha de Excel
+        else return { error: true };
+      }
+      const f = new Date(Date.UTC(y, m - 1, d));
+      if (y < 1940 || y > 2100 || f.getUTCMonth() !== m - 1 || f.getUTCDate() !== d) return { error: true };
+      return { valor: `${y}-${dos(m)}-${dos(d)}` };
+    }
+
+    function convertirTipo(valor) {
+      const k = clave(valor);
+      if (!k) return { valor: null };
+      if (k.startsWith('asist')) return { valor: 'Asistencial' };
+      if (k.startsWith('admin')) return { valor: 'Administrativo' };
+      return { error: true };
+    }
+
+    // Mismo cálculo que la base de datos: meses cumplidos a la fecha de corte
+    function rangoDe(fecha) {
+      if (!fecha || !estado.fechaCorte) return null;
+      const [y1, m1, d1] = fecha.split('-').map(Number);
+      const [y2, m2, d2] = estado.fechaCorte.split('-').map(Number);
+      const meses = Math.max(0, (y2 - y1) * 12 + (m2 - m1) - (d2 < d1 ? 1 : 0));
+      const r = estado.rangos.find((x) => meses >= x.meses_min && (x.meses_max === null || meses <= x.meses_max));
+      return r ? r.id : null;
+    }
+
+    function revisar(filasArchivo) {
+      // Busca la fila de encabezados (puede haber títulos arriba)
+      let filaEnc = -1;
+      let mapa = {};
+      for (let i = 0; i < Math.min(filasArchivo.length, 15); i++) {
+        const claves = filasArchivo[i].map(clave);
+        const m = {};
+        COLUMNAS.forEach((col) => {
+          const idx = claves.findIndex((c) => ALIAS[col].includes(c));
+          if (idx >= 0) m[col] = idx;
+        });
+        if (m.identificacion !== undefined && Object.keys(m).length >= 3) { filaEnc = i; mapa = m; break; }
+      }
+
+      const problemas = [];
+      if (filaEnc < 0) {
+        return { filas: [], problemas: [{ fila: '—', id: '', tipo: 'error', detalle: 'No se encontró la fila de encabezados. Revise que el archivo tenga la columna "identificacion".' }], faltantes: [] };
+      }
+      const faltantes = OBLIGATORIAS.filter((c) => mapa[c] === undefined);
+      if (faltantes.length) {
+        problemas.push({ fila: filaEnc + 1, id: '', tipo: 'error', detalle: 'Faltan columnas obligatorias: ' + faltantes.join(', ') });
+      }
+      ['fecha_vinculacion', 'tipo_personal'].forEach((c) => {
+        if (mapa[c] === undefined) problemas.push({ fila: filaEnc + 1, id: '', tipo: 'aviso', detalle: `No se encontró la columna "${c}".` });
+      });
+
+      const filas = [];
+      const vistos = new Map();
+      for (let i = filaEnc + 1; i < filasArchivo.length; i++) {
+        const r = filasArchivo[i];
+        const celda = (col) => (mapa[col] === undefined ? '' : r[mapa[col]]);
+        if (r.every((v) => String(v).trim() === '')) continue;
+
+        const n = i + 1;  // fila como la ve Excel
+        const id = String(celda('identificacion') ?? '').replace(/[^0-9A-Za-z]/g, '').toUpperCase();
+        const fila = {
+          identificacion: id,
+          nombres: limpiarTexto(celda('nombres')),
+          apellidos: limpiarTexto(celda('apellidos')),
+          fecha_vinculacion: null,
+          cargo: limpiarTexto(celda('cargo')),
+          empresa: limpiarTexto(celda('empresa')),
+          tipo_personal: null,
+          _fila: n
+        };
+        const malos = [];
+        if (!id) malos.push('sin identificación');
+        if (!fila.nombres) malos.push('sin nombres');
+        if (!fila.apellidos) malos.push('sin apellidos');
+        if (!fila.empresa) malos.push('sin empresa');
+
+        const f = convertirFecha(celda('fecha_vinculacion'));
+        if (f.error) malos.push(`fecha de vinculación no válida ("${celda('fecha_vinculacion')}")`);
+        else fila.fecha_vinculacion = f.valor;
+
+        const t = convertirTipo(celda('tipo_personal'));
+        if (t.error) malos.push(`tipo de personal no válido ("${celda('tipo_personal')}"); use Asistencial o Administrativo`);
+        else fila.tipo_personal = t.valor;
+
+        if (malos.length) problemas.push({ fila: n, id, tipo: 'error', detalle: malos.join('; ') });
+
+        if (id) {
+          if (vistos.has(id)) problemas.push({ fila: n, id, tipo: 'error', detalle: `identificación repetida (también en la fila ${vistos.get(id)})` });
+          else vistos.set(id, n);
+        }
+        if (!malos.length) {
+          if (mapa.tipo_personal !== undefined && !fila.tipo_personal) problemas.push({ fila: n, id, tipo: 'aviso', detalle: 'sin tipo de personal: solo participará en sorteos para todo el personal' });
+          if (mapa.fecha_vinculacion !== undefined && !fila.fecha_vinculacion) problemas.push({ fila: n, id, tipo: 'aviso', detalle: 'sin fecha de vinculación: solo participará en sorteos de toda antigüedad' });
+          if (fila.fecha_vinculacion && estado.fechaCorte && fila.fecha_vinculacion > estado.fechaCorte) problemas.push({ fila: n, id, tipo: 'aviso', detalle: `fecha de vinculación posterior a la fecha de corte (${fila.fecha_vinculacion})` });
+        }
+        filas.push(fila);
+      }
+      if (!filas.length && !faltantes.length) problemas.push({ fila: '—', id: '', tipo: 'error', detalle: 'El archivo no tiene colaboradores debajo de los encabezados.' });
+      return { filas, problemas, faltantes };
+    }
+
+    function pintarRevision(resultado) {
+      const { filas, problemas } = resultado;
+      const errores = problemas.filter((p) => p.tipo === 'error');
+      const avisos = problemas.filter((p) => p.tipo === 'aviso');
+      estado.filas = filas;
+      estado.errores = errores.length;
+
+      $('resumen-archivo').innerHTML = [
+        `<span class="chip info">${filas.length} colaboradores leídos</span>`,
+        errores.length ? `<span class="chip error">${errores.length} error(es)</span>` : '<span class="chip ok">Sin errores</span>',
+        avisos.length ? `<span class="chip aviso">${avisos.length} advertencia(s)</span>` : ''
+      ].join('');
+
+      mostrar('caja-problemas', problemas.length > 0);
+      $('texto-problemas').textContent = errores.length
+        ? 'Corrija los errores en el archivo y vuelva a seleccionarlo. Las advertencias no impiden la carga.'
+        : 'Las advertencias no impiden la carga, pero conviene revisarlas con Talento Humano.';
+      const orden = [...errores, ...avisos];
+      $('tabla-problemas').innerHTML = orden.slice(0, 300).map((p) => `<tr>
+        <td class="num">${esc(p.fila)}</td>
+        <td>${esc(p.id)}</td>
+        <td class="${p.tipo === 'error' ? 'tipo-error' : 'tipo-aviso'}">${p.tipo === 'error' ? 'Error' : 'Advertencia'}</td>
+        <td>${esc(p.detalle)}</td>
+      </tr>`).join('') + (orden.length > 300 ? `<tr><td colspan="4">… y ${orden.length - 300} más</td></tr>` : '');
+
+      // El resumen por grupos solo se muestra cuando el archivo no tiene errores
+      if (errores.length) mostrar('caja-grupos', false);
+      else pintarGrupos(filas);
+      mostrar('caja-carga', errores.length === 0 && filas.length > 0);
+      mostrar('resultado-carga', false);
+      actualizarBotonCarga();
+      mostrar('revision', true);
+    }
+
+    function pintarGrupos(filas) {
+      if (!filas.length) { mostrar('caja-grupos', false); return; }
+      const columnas = [...estado.rangos.map((r) => ({ id: r.id, nombre: r.nombre })), { id: null, nombre: 'Sin fecha' }];
+      const grupos = new Map();
+      filas.forEach((f) => {
+        const k = f.empresa + '|' + (f.tipo_personal || 'Sin tipo');
+        if (!grupos.has(k)) grupos.set(k, { empresa: f.empresa, tipo: f.tipo_personal || 'Sin tipo', cuenta: new Map(), total: 0 });
+        const g = grupos.get(k);
+        const r = f.fecha_vinculacion ? rangoDe(f.fecha_vinculacion) : null;
+        g.cuenta.set(r, (g.cuenta.get(r) || 0) + 1);
+        g.total++;
+      });
+      const usarSinFecha = filas.some((f) => !f.fecha_vinculacion);
+      const cols = usarSinFecha ? columnas : columnas.filter((c) => c.id !== null);
+
+      $('cabeza-grupos').innerHTML = `<tr><th>Empresa</th><th>Tipo</th>${cols.map((c) => `<th class="num">${esc(c.nombre)}</th>`).join('')}<th class="num">Total</th></tr>`;
+      const lista = [...grupos.values()].sort((a, b) => a.empresa.localeCompare(b.empresa) || a.tipo.localeCompare(b.tipo));
+      $('tabla-grupos').innerHTML = lista.map((g) => `<tr>
+        <td>${esc(g.empresa)}</td><td>${esc(g.tipo)}</td>
+        ${cols.map((c) => `<td class="num">${g.cuenta.get(c.id) || 0}</td>`).join('')}
+        <td class="num"><strong>${g.total}</strong></td>
+      </tr>`).join('');
+      const totalCol = (id) => lista.reduce((s, g) => s + (g.cuenta.get(id) || 0), 0);
+      $('pie-grupos').innerHTML = `<tr><td colspan="2">Total</td>${cols.map((c) => `<td class="num">${totalCol(c.id)}</td>`).join('')}<td class="num">${filas.length}</td></tr>`;
+      mostrar('caja-grupos', true);
+    }
+
+    $('archivo').addEventListener('change', async (e) => {
+      const archivo = e.target.files[0];
+      document.querySelectorAll('input[name="modo"]').forEach((r) => { r.checked = false; });
+      $('texto-reemplazo').value = '';
+      mostrar('confirmar-reemplazo', false);
+      if (!archivo) { mostrar('revision', false); return; }
+      if (!window.XLSX) { aviso('No se pudo cargar el componente de Excel. Revise la conexión.', true); return; }
+      try {
+        if (!estado.fechaCorte) await cargarEstado();
+        const filasArchivo = await leerFilas(archivo);
+        pintarRevision(revisar(filasArchivo));
+      } catch (err) {
+        console.error(err);
+        aviso('No se pudo leer el archivo: ' + (err.message || err), true);
+        mostrar('revision', false);
+      }
+    });
+
+    // ---------------------------------------------------------------
+    // Carga
+    // ---------------------------------------------------------------
+    function modoElegido() {
+      const r = document.querySelector('input[name="modo"]:checked');
+      return r ? r.value : null;
+    }
+
+    function actualizarBotonCarga() {
+      const modo = modoElegido();
+      mostrar('confirmar-reemplazo', modo === 'reemplazar');
+      const confirmado = modo !== 'reemplazar' || $('texto-reemplazo').value.trim().toUpperCase() === 'BORRAR';
+      const boton = $('cargar');
+      boton.disabled = !modo || !confirmado || estado.errores > 0 || !estado.filas.length;
+      boton.classList.toggle('rojo', modo === 'reemplazar');
+      boton.textContent = modo === 'reemplazar'
+        ? `Borrar todo y cargar ${estado.filas.length} colaboradores`
+        : `Cargar ${estado.filas.length} colaboradores`;
+    }
+
+    document.querySelectorAll('input[name="modo"]').forEach((r) => r.addEventListener('change', actualizarBotonCarga));
+    $('texto-reemplazo').addEventListener('input', actualizarBotonCarga);
+
+    $('cargar').addEventListener('click', async () => {
+      const modo = modoElegido();
+      if (!modo || estado.errores > 0 || !estado.filas.length) return;
+      if (modo === 'actualizar' && !confirm(`¿Agregar o actualizar ${estado.filas.length} colaboradores en la nómina?`)) return;
+
+      const boton = $('cargar');
+      boton.disabled = true;
+      boton.textContent = 'Cargando...';
+      const filas = estado.filas.map((f) => {
+        const limpia = {};
+        COLUMNAS.forEach((c) => { limpia[c] = f[c] ?? ''; });
+        return limpia;
+      });
+
+      const { data, error } = await db.rpc('cargar_nomina', { p_filas: filas, p_reemplazar: modo === 'reemplazar' });
+      if (error) {
+        aviso('No se cargó nada: ' + error.message, true);
+        actualizarBotonCarga();
+        return;
+      }
+
+      $('resultado-carga').textContent = data.reemplazo
+        ? `Listo: se borraron los datos anteriores y se cargaron ${data.total} colaboradores.`
+        : `Listo: ${data.nuevos} colaborador(es) nuevo(s) y ${data.actualizados} actualizado(s). Total en la nómina: ${data.en_nomina}.`;
+      mostrar('resultado-carga', true);
+      mostrar('confirmar-reemplazo', false);
+      document.querySelectorAll('input[name="modo"]').forEach((r) => { r.checked = false; });
+      $('texto-reemplazo').value = '';
+      $('archivo').value = '';
+      estado.filas = [];
+      boton.textContent = 'Cargar nómina';
+      boton.disabled = true;
+      boton.classList.remove('rojo');
+      aviso('Nómina cargada correctamente.');
+      cargarEstado();
+    });
+
+    // ---------------------------------------------------------------
+    // Borrar registros y sorteos
+    // ---------------------------------------------------------------
+    $('texto-limpiar').addEventListener('input', () => {
+      $('limpiar').disabled = $('texto-limpiar').value.trim().toUpperCase() !== 'BORRAR';
+    });
+
+    $('limpiar').addEventListener('click', async () => {
+      if ($('texto-limpiar').value.trim().toUpperCase() !== 'BORRAR') return;
+      const boton = $('limpiar');
+      boton.disabled = true;
+      const { data, error } = await db.rpc('limpiar_registros');
+      $('texto-limpiar').value = '';
+      if (error) { aviso('No se borró nada: ' + error.message, true); return; }
+      aviso(`Listo: se borraron ${data.registros_borrados} registro(s) y ${data.sorteos_borrados} sorteo(s). La nómina se conservó.`);
+      cargarEstado();
+    });
+
+    verificarSesion();
+  </script>
+</body>
+</html>
