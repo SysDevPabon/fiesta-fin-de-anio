@@ -1,20 +1,21 @@
 <!doctype html>
 <!-- =====================================================================
-     Fiesta fin de año 2026 - Gestión de nómina
+     Fiesta fin de año 2026 - Gestión de nómina y usuarios
      Ruta en el repositorio: nomina.html
      Uso: solo usuarios con rol "admin"
      - Estado de la base de datos
      - Cargar la nómina desde Excel (.xlsx) o CSV, con revisión previa
        (reemplazar todo, o agregar/actualizar)
+     - Crear, eliminar y cambiar contraseña / rol de usuarios
      - Borrar registros y sorteos conservando la nómina
-     Requiere sql/09_gestion_nomina.sql
+     Requiere sql/09_gestion_nomina.sql y sql/10_gestion_usuarios.sql
      Imágenes: img/logo-clinica.png, img/logo-centro.png
      ===================================================================== -->
 <html lang="es">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Nómina - Fiesta fin de año 2026</title>
+  <title>Nómina y usuarios - Fiesta fin de año 2026</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -231,6 +232,52 @@
 
     .login { max-width: 400px; margin: 40px auto; border-top: 5px solid var(--rojo); }
 
+    /* ---------- Usuarios ---------- */
+    .rejilla-usuario {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px 14px;
+      align-items: end;
+    }
+    .con-boton { display: flex; gap: 6px; }
+    .con-boton input { flex: 1; min-width: 0; font-family: ui-monospace, 'Consolas', monospace; }
+    .con-boton button { padding: 10px 12px; }
+    select {
+      font: inherit;
+      font-size: 15px;
+      padding: 10px 12px;
+      border: 1.5px solid var(--borde);
+      border-radius: 10px;
+      background: #fff;
+      color: inherit;
+      width: 100%;
+    }
+    .boton-crear button { width: 100%; }
+    .credenciales {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: var(--verde-fondo);
+      border: 1px solid #BFE3CC;
+    }
+    .credenciales strong { color: var(--verde); }
+    .cred-datos { display: flex; gap: 6px 18px; flex-wrap: wrap; margin: 6px 0 4px; font-size: 14px; }
+    .cred-datos code { font-size: 14.5px; font-weight: 600; background: #fff; padding: 2px 8px; border-radius: 6px; }
+    .credenciales small { color: var(--texto-suave); }
+    .tabla-usuarios td { vertical-align: middle; }
+    .tabla-usuarios select { width: auto; font-size: 14px; padding: 7px 10px; }
+    .tabla-usuarios .acciones { flex-wrap: nowrap; justify-content: flex-end; }
+    button.mini { padding: 7px 11px; font-size: 13px; white-space: nowrap; }
+    button.peligro { background: #fff; color: var(--rojo); border: 1.5px solid #F3C2C3; }
+    button.peligro:hover:not(:disabled) { background: var(--rojo-fondo); border-color: var(--rojo); }
+    .yo { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 600; background: var(--verde-fondo); color: var(--verde); }
+    .sub { color: var(--texto-suave); font-size: 12.5px; }
+
     .aviso {
       position: fixed;
       left: 50%;
@@ -257,7 +304,7 @@
         <img src="img/logo-clinica.png" alt="Clínica Pabón" class="logo">
         <img src="img/logo-centro.png" alt="Centro de Cuidados Cardioneurovasculares Pabón S.A.S." class="logo centro">
         <div class="titulo-panel">
-          <small>Gestión de nómina</small>
+          <small>Gestión de nómina y usuarios</small>
           <strong id="titulo-evento">Fiesta fin de año 2026</strong>
         </div>
       </div>
@@ -376,6 +423,69 @@
         </div>
       </section>
 
+      <!-- ================= Usuarios ================= -->
+      <section class="tarjeta">
+        <h2>Usuarios</h2>
+        <p class="ayuda">
+          <b>Ingreso:</b> solo puede marcar llegadas en la página de ingreso.
+          <b>Administrador:</b> panel de administración, sorteo y este módulo.
+        </p>
+
+        <h3><span class="paso">+</span>Crear usuario</h3>
+        <form id="form-usuario" class="rejilla-usuario" novalidate>
+          <div>
+            <label class="campo" for="nu-nombre">Nombre</label>
+            <input type="text" id="nu-nombre" placeholder="Ej.: Portería principal" autocomplete="off">
+          </div>
+          <div>
+            <label class="campo" for="nu-correo">Correo</label>
+            <input type="email" id="nu-correo" placeholder="usuario@clinicardiopabon.com" autocomplete="off">
+          </div>
+          <div>
+            <label class="campo" for="nu-clave">Contraseña (mínimo 8)</label>
+            <div class="con-boton">
+              <input type="text" id="nu-clave" autocomplete="new-password" spellcheck="false">
+              <button type="button" class="secundario" id="generar-clave" title="Generar una contraseña segura">Generar</button>
+            </div>
+          </div>
+          <div>
+            <label class="campo" for="nu-rol">Rol</label>
+            <select id="nu-rol">
+              <option value="ingreso">Ingreso</option>
+              <option value="admin">Administrador</option>
+            </select>
+          </div>
+          <div class="boton-crear">
+            <button type="submit" id="crear-usuario">Crear usuario</button>
+          </div>
+        </form>
+
+        <div class="credenciales oculto" id="credenciales" role="status">
+          <div>
+            <strong id="cred-titulo">Datos de acceso</strong>
+            <div class="cred-datos">
+              <span>Correo: <code id="cred-correo"></code></span>
+              <span>Contraseña: <code id="cred-clave"></code></span>
+            </div>
+            <small>Entréguelos de forma privada. La contraseña no se volverá a mostrar.</small>
+          </div>
+          <div class="acciones">
+            <button type="button" id="copiar-cred">Copiar datos</button>
+            <button type="button" class="secundario" id="cerrar-cred">Cerrar</button>
+          </div>
+        </div>
+
+        <h3>Usuarios actuales</h3>
+        <div class="tabla-scroll">
+          <table class="tabla-usuarios">
+            <thead>
+              <tr><th>Correo</th><th>Nombre</th><th>Rol</th><th>Último ingreso</th><th></th></tr>
+            </thead>
+            <tbody id="tabla-usuarios"></tbody>
+          </table>
+        </div>
+      </section>
+
       <!-- ================= Limpiar registros ================= -->
       <section class="tarjeta peligro">
         <h2>Borrar registros y sorteos</h2>
@@ -417,7 +527,7 @@
       tipo_personal: ['tipo_personal', 'tipo_de_personal', 'tipo', 'personal']
     };
 
-    const estado = { rangos: [], fechaCorte: null, filas: [], errores: 0, sesion: false };
+    const estado = { rangos: [], fechaCorte: null, filas: [], errores: 0, sesion: false, usuarios: [], miId: null };
 
     $('titulo-evento').textContent = cfg.EVENTO_NOMBRE;
 
@@ -466,6 +576,7 @@
         return;
       }
       estado.sesion = true;
+      estado.miId = session.user.id;
       $('correo-usuario').textContent = session.user.email;
       mostrar('vista-login', false);
       mostrar('zona-usuario', true);
@@ -509,16 +620,20 @@
       const boton = $('actualizar');
       boton.disabled = true;
       try {
-        const [nomina, registros, asistentes, sorteos, rangos, evento] = await Promise.all([
+        const [nomina, registros, asistentes, sorteos, rangos, evento, usuarios] = await Promise.all([
           contar('nomina'),
           contar('registros'),
           contar('registros', ['asistio', true]),
           contar('premios'),
           db.from('rangos_antiguedad').select('*').order('id'),
-          db.from('evento').select('fecha_corte_antiguedad').eq('id', 1).single()
+          db.from('evento').select('fecha_corte_antiguedad').eq('id', 1).single(),
+          db.rpc('listar_usuarios')
         ]);
         if (rangos.error) throw rangos.error;
         if (evento.error) throw evento.error;
+        if (usuarios.error) throw usuarios.error;
+        estado.usuarios = usuarios.data || [];
+        pintarUsuarios();
         $('c-nomina').textContent = nomina;
         $('c-registros').textContent = registros;
         $('c-asistentes').textContent = asistentes;
@@ -832,6 +947,158 @@
       boton.classList.remove('rojo');
       aviso('Nómina cargada correctamente.');
       cargarEstado();
+    });
+
+    // ---------------------------------------------------------------
+    // Usuarios
+    // ---------------------------------------------------------------
+    const NOMBRE_ROL = { admin: 'Administrador', ingreso: 'Ingreso' };
+
+    function generarClave() {
+      // Sin letras/números que se confunden (0/O, 1/l/I)
+      const grupos = ['ABCDEFGHJKLMNPQRSTUVWXYZ', 'abcdefghijkmnpqrstuvwxyz', '23456789'];
+      const todos = grupos.join('');
+      const azar = new Uint32Array(12);
+      crypto.getRandomValues(azar);
+      const letras = Array.from(azar, (n, i) => (i < 3 ? grupos[i] : todos)[n % (i < 3 ? grupos[i] : todos).length]);
+      // Mezcla para que los tres primeros (uno de cada grupo) no queden siempre al inicio
+      for (let i = letras.length - 1; i > 0; i--) {
+        const j = azar[i] % (i + 1);
+        [letras[i], letras[j]] = [letras[j], letras[i]];
+      }
+      return letras.join('');
+    }
+
+    function fechaHora(ts) {
+      if (!ts) return '';
+      return new Date(ts).toLocaleString('es-CO', {
+        timeZone: 'America/Bogota', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+    }
+
+    function mostrarCredenciales(titulo, correo, clave) {
+      $('cred-titulo').textContent = titulo;
+      $('cred-correo').textContent = correo;
+      $('cred-clave').textContent = clave;
+      mostrar('credenciales', true);
+    }
+
+    function pintarUsuarios() {
+      if (!estado.usuarios.length) {
+        $('tabla-usuarios').innerHTML = '<tr><td colspan="5" class="sub">No hay usuarios.</td></tr>';
+        return;
+      }
+      $('tabla-usuarios').innerHTML = estado.usuarios.map((u) => {
+        const yo = u.user_id === estado.miId;
+        return `<tr data-uid="${esc(u.user_id)}">
+          <td>${esc(u.email)}${yo ? '<span class="yo">usted</span>' : ''}</td>
+          <td>${esc(u.nombre || '')}</td>
+          <td>
+            <select aria-label="Rol de ${esc(u.email)}" data-rol ${yo ? 'disabled' : ''}>
+              <option value="" ${!u.rol ? 'selected' : ''}>Sin acceso</option>
+              <option value="ingreso" ${u.rol === 'ingreso' ? 'selected' : ''}>Ingreso</option>
+              <option value="admin" ${u.rol === 'admin' ? 'selected' : ''}>Administrador</option>
+            </select>
+          </td>
+          <td>${u.ultimo_ingreso ? fechaHora(u.ultimo_ingreso) : '<span class="sub">Nunca</span>'}</td>
+          <td>
+            <div class="acciones">
+              <button type="button" class="mini secundario" data-clave>Nueva contraseña</button>
+              <button type="button" class="mini peligro" data-eliminar ${yo ? 'disabled title="No puede eliminar su propio usuario"' : ''}>Eliminar</button>
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    $('generar-clave').addEventListener('click', () => { $('nu-clave').value = generarClave(); });
+
+    $('form-usuario').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nombre = $('nu-nombre').value.trim();
+      const correo = $('nu-correo').value.trim().toLowerCase();
+      const clave = $('nu-clave').value;
+      const rol = $('nu-rol').value;
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(correo)) { aviso('Escriba un correo válido.', true); return; }
+      if (clave.length < 8) { aviso('La contraseña debe tener al menos 8 caracteres. Use "Generar".', true); return; }
+
+      const boton = $('crear-usuario');
+      boton.disabled = true;
+      boton.textContent = 'Creando...';
+      const { error } = await db.rpc('crear_usuario', { p_email: correo, p_clave: clave, p_nombre: nombre, p_rol: rol });
+      boton.disabled = false;
+      boton.textContent = 'Crear usuario';
+      if (error) { aviso('No se creó el usuario: ' + error.message, true); return; }
+
+      $('form-usuario').reset();
+      mostrarCredenciales(`Usuario creado (${NOMBRE_ROL[rol]}). Datos de acceso:`, correo, clave);
+      aviso('Usuario creado.');
+      cargarEstado();
+    });
+
+    $('copiar-cred').addEventListener('click', async () => {
+      const pagina = new URL('menu.html', window.location.href).href;
+      const texto = `Fiesta fin de año - acceso\nPágina: ${pagina}\nCorreo: ${$('cred-correo').textContent}\nContraseña: ${$('cred-clave').textContent}`;
+      try {
+        await navigator.clipboard.writeText(texto);
+        aviso('Datos copiados.');
+      } catch (err) {
+        aviso('No se pudo copiar. Cópielos manualmente.', true);
+      }
+    });
+
+    $('cerrar-cred').addEventListener('click', () => {
+      mostrar('credenciales', false);
+      $('cred-clave').textContent = '';
+    });
+
+    // Cambiar rol (al elegir en la lista)
+    $('tabla-usuarios').addEventListener('change', async (e) => {
+      const select = e.target.closest('select[data-rol]');
+      if (!select) return;
+      const uid = select.closest('tr').dataset.uid;
+      const u = estado.usuarios.find((x) => x.user_id === uid);
+      const rol = select.value;
+
+      if (!rol && !confirm(`¿Quitar el acceso a ${u.email}? El usuario seguirá existiendo, pero no podrá entrar a ningún módulo.`)) {
+        select.value = u.rol || '';
+        return;
+      }
+      select.disabled = true;
+      const { error } = rol
+        ? await db.rpc('asignar_rol', { p_user_id: uid, p_rol: rol, p_nombre: u.nombre })
+        : await db.rpc('quitar_acceso', { p_user_id: uid });
+      select.disabled = false;
+      if (error) { aviso(error.message, true); select.value = u.rol || ''; return; }
+      aviso(rol ? `Rol actualizado: ${NOMBRE_ROL[rol]}.` : 'Acceso retirado.');
+      cargarEstado();
+    });
+
+    // Nueva contraseña / Eliminar
+    $('tabla-usuarios').addEventListener('click', async (e) => {
+      const fila = e.target.closest('tr[data-uid]');
+      if (!fila) return;
+      const u = estado.usuarios.find((x) => x.user_id === fila.dataset.uid);
+
+      if (e.target.closest('button[data-clave]')) {
+        if (!confirm(`¿Asignar una contraseña nueva a ${u.email}? La anterior dejará de funcionar.`)) return;
+        const clave = generarClave();
+        const { error } = await db.rpc('cambiar_clave_usuario', { p_user_id: u.user_id, p_clave: clave });
+        if (error) { aviso('No se cambió la contraseña: ' + error.message, true); return; }
+        mostrarCredenciales('Contraseña nueva. Datos de acceso:', u.email, clave);
+        window.scrollTo({ top: $('form-usuario').getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' });
+        return;
+      }
+
+      const eliminar = e.target.closest('button[data-eliminar]');
+      if (eliminar) {
+        if (!confirm(`¿Eliminar definitivamente el usuario ${u.email}? No podrá volver a entrar.`)) return;
+        eliminar.disabled = true;
+        const { error } = await db.rpc('eliminar_usuario', { p_user_id: u.user_id });
+        if (error) { eliminar.disabled = false; aviso('No se eliminó: ' + error.message, true); return; }
+        aviso('Usuario eliminado.');
+        cargarEstado();
+      }
     });
 
     // ---------------------------------------------------------------
